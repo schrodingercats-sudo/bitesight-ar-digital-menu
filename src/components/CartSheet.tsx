@@ -1,10 +1,14 @@
 import React from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useCartStore } from '@/store/useCartStore';
-import { Minus, Plus, Trash2, ShoppingBasket } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBasket, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { api } from '@/lib/api-client';
+import type { OrderRequest, Order } from '@shared/types';
 interface CartSheetProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,15 +18,40 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const getTotal = useCartStore((s) => s.getTotal);
+  const clearCart = useCartStore((s) => s.clearCart);
   const subtotal = getTotal();
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
+  const checkoutMutation = useMutation({
+    mutationFn: (order: OrderRequest) => api<Order>('/api/orders', {
+      method: 'POST',
+      body: JSON.stringify(order),
+    }),
+    onSuccess: () => {
+      toast.success('Order placed successfully!', {
+        description: 'The kitchen has received your order.',
+      });
+      clearCart();
+      onClose();
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to place order', {
+        description: error.message,
+      });
+    },
+  });
+  const handleCheckout = () => {
+    checkoutMutation.mutate({
+      items,
+      tableNumber: "Table 12", // In real app, this would come from URL or scan
+    });
+  };
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-full sm:max-w-md flex flex-col p-0">
         <SheetHeader className="p-6 border-b">
           <SheetTitle className="flex items-center gap-2">
-            <ShoppingBasket className="w-5 h-5 text-primary" />
+            <ShoppingBasket className="w-5 h-5 text-[#EA580C]" />
             Your Order
           </SheetTitle>
         </SheetHeader>
@@ -48,7 +77,7 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <h4 className="font-semibold text-sm truncate pr-2">{item.name}</h4>
-                        <button 
+                        <button
                           onClick={() => removeItem(item.id)}
                           className="text-muted-foreground hover:text-destructive"
                         >
@@ -57,18 +86,18 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
                       </div>
                       <p className="text-xs text-muted-foreground mb-2">${item.price.toFixed(2)}</p>
                       <div className="flex items-center gap-3">
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
+                        <Button
+                          variant="outline"
+                          size="icon"
                           className="h-7 w-7 rounded-full"
                           onClick={() => updateQuantity(item.id, -1)}
                         >
                           <Minus className="w-3 h-3" />
                         </Button>
                         <span className="text-sm font-medium w-4 text-center">{item.quantity}</span>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
+                        <Button
+                          variant="outline"
+                          size="icon"
                           className="h-7 w-7 rounded-full"
                           onClick={() => updateQuantity(item.id, 1)}
                         >
@@ -93,10 +122,17 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
                 <Separator className="my-2" />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span className="text-primary">${total.toFixed(2)}</span>
+                  <span className="text-[#EA580C]">${total.toFixed(2)}</span>
                 </div>
               </div>
-              <Button className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90">
+              <Button 
+                className="w-full h-12 text-lg font-bold bg-[#EA580C] hover:bg-[#C2410C]"
+                disabled={checkoutMutation.isPending}
+                onClick={handleCheckout}
+              >
+                {checkoutMutation.isPending ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : null}
                 Place Order
               </Button>
             </div>
