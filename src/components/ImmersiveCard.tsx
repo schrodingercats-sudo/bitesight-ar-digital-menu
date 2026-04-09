@@ -73,9 +73,6 @@ export function ImmersiveCard({ item }: ImmersiveCardProps) {
               <p className="text-3xl font-black text-orange-500">${item.price.toFixed(2)}</p>
               <div className="h-px flex-1 bg-white/10" />
             </div>
-            <p className="mt-4 text-zinc-400 text-sm font-medium leading-relaxed line-clamp-2 max-w-md">
-              {item.description}
-            </p>
           </motion.div>
         </div>
       </div>

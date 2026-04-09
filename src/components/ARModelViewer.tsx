@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useContext, memo } from 'react';
 import '@google/model-viewer';
 import { SwipePanContext } from './SwipePanContext';
 import { Box, RefreshCw, AlertTriangle } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 interface ARModelViewerProps {
   src: string;
@@ -17,6 +18,8 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
   const [arModes, setArModes] = useState<string[]>([]);
   const [isActivatingAR, setIsActivatingAR] = useState(false);
   const [arError, setArError] = useState<string | null>(null);
+  const [showOverlays, setShowOverlays] = useState(true);
+  const isMobile = useIsMobile();
   const contextValue = useContext(SwipePanContext);
   const isPanning = !!(contextValue && contextValue.isPanning);
   useEffect(() => {
@@ -32,6 +35,7 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
     const handleArStatus = (event: any) => {
       console.log('AR status detail:', event.detail);
       setArStatus(event.detail.status);
+      setShowOverlays(event.detail.status !== 'session-started');
       setArModes(event.detail.availableModes || []);
     };
     const handleInteraction = () => setHasInteracted(true);
@@ -96,13 +100,13 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         touch-action="none"
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' } as React.CSSProperties}
       >
-        {isLoaded && arStatus === 'ready' && arModes.includes('webxr') && (
+        {isLoaded && arStatus === 'ready' && arModes.includes('webxr') && showOverlays && (
           <button
             slot="ar-button"
             onPointerDown={(e) => e.preventDefault()}
             onClick={activateAR}
             disabled={isActivatingAR || arError !== null}
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-[100] border-none text-lg pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+            className="absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-[100] border-none text-lg pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
           >
             {isActivatingAR ? (
               <>
@@ -122,35 +126,35 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
             )}
           </button>
         )}
-        {isLoaded && arStatus === 'ready' && !arModes.includes('webxr') && arModes.includes('scene-viewer') && (
+        {isLoaded && isMobile && !(arStatus === 'ready' && arModes.includes('webxr')) && showOverlays && (
           <Button
             variant="outline"
             asChild
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white/90 text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-[100] border-2 border-orange-500/50 hover:border-orange-500 pointer-events-auto"
+            className="absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 bg-white/90 text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-[100] border-2 border-orange-500/50 hover:border-orange-500 pointer-events-auto"
           >
-            <a href={`https://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(src)}`} target='_blank' rel='noopener'>
+            <a href={`https://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(src)}`} target='_blank' rel='noopener noreferrer'>
               <Box className="w-6 h-6 text-orange-500" />
-              Open Scene Viewer
+              Open Scene Viewer QR
             </a>
           </Button>
         )}
-        {isLoaded && arStatus === 'unsupported' && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 z-30">
+        {isLoaded && arStatus === 'unsupported' && showOverlays && (
+          <div className="absolute top-12 sm:top-20 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 z-30">
             <AlertTriangle className="w-3 h-3 text-orange-500" />
             3D Preview Only
           </div>
         )}
-        {isLoaded && hasInteracted && (
+        {isLoaded && hasInteracted && showOverlays && (
           <Button
             size="icon"
             variant="outline"
             onClick={handleReset}
-            className="absolute top-6 left-6 h-12 w-12 rounded-full bg-black/40 backdrop-blur-md border-white/10 text-white hover:bg-black/60 z-20 pointer-events-auto"
+            className="absolute top-4 sm:top-6 left-6 h-12 w-12 rounded-full bg-black/40 backdrop-blur-md border-white/10 text-white hover:bg-black/60 z-20 pointer-events-auto"
           >
             <RefreshCw className="w-5 h-5" />
           </Button>
         )}
-        {!isLoaded && (
+        {!isLoaded && showOverlays && (
           <div className="absolute inset-0 flex items-center justify-center z-10 bg-transparent">
             <div className="flex flex-col items-center gap-4">
               <div className="w-12 h-12 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
