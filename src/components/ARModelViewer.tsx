@@ -14,6 +14,9 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [arStatus, setArStatus] = useState<string>('none');
+  const [arModes, setArModes] = useState<string[]>([]);
+  const [isActivatingAR, setIsActivatingAR] = useState(false);
+  const [arError, setArError] = useState<string | null>(null);
   const contextValue = useContext(SwipePanContext);
   const isPanning = !!(contextValue && contextValue.isPanning);
   useEffect(() => {
@@ -22,11 +25,14 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
     const handleLoad = () => {
       setIsLoaded(true);
       console.log('Model loaded, AR modes:', modelViewer.arModes);
+      console.log('Model availableARModes:', modelViewer.availableARModes);
+      if (modelViewer.availableARModes) setArModes(Array.from(modelViewer.availableARModes));
     };
     const handleError = () => console.error('Model failed to load:', src);
     const handleArStatus = (event: any) => {
-      console.log('AR status:', event.detail.status);
+      console.log('AR status detail:', event.detail);
       setArStatus(event.detail.status);
+      setArModes(event.detail.availableModes || []);
     };
     const handleInteraction = () => setHasInteracted(true);
     modelViewer.addEventListener('load', handleLoad);
@@ -40,6 +46,24 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
       modelViewer.removeEventListener('pointerdown', handleInteraction);
     };
   }, [src]);
+  const activateAR = async () => {
+    const model = modelRef.current;
+    if (!model) return;
+    setIsActivatingAR(true);
+    setArError(null);
+    try {
+      console.log('Attempting to activate AR session');
+      await model.activateAR();
+      console.log('AR session started successfully');
+    } catch (e: any) {
+      const msg = e.message || String(e);
+      console.error('activateAR failed:', msg);
+      setArError(msg);
+    } finally {
+      setIsActivatingAR(false);
+    }
+  };
+
   const handleReset = () => {
     const mv = modelRef.current;
     if (mv) {
@@ -72,18 +96,43 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         touch-action="none"
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' } as React.CSSProperties}
       >
-        {isLoaded && (arStatus === 'none' || arStatus === 'ready') && (
+        {isLoaded && arStatus === 'ready' && arModes.includes('webxr') && (
           <button
             slot="ar-button"
-            onClick={() => {
-              console.log('User tapped AR button, calling activateAR()');
-              modelRef.current?.activateAR().then(() => console.log('AR activated')).catch(e => console.error('activateAR failed:', e));
-            }}
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-[100] border-none text-lg pointer-events-auto"
+            onPointerDown={(e) => e.preventDefault()}
+            onClick={activateAR}
+            disabled={isActivatingAR || arError !== null}
+            className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-[100] border-none text-lg pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
           >
-            <Box className="w-6 h-6 text-orange-500" />
-            VIEW IN YOUR SPACE
+            {isActivatingAR ? (
+              <>
+                <RefreshCw className="w-6 h-6 text-orange-500 animate-spin" />
+                Starting AR...
+              </>
+            ) : arError ? (
+              <>
+                <AlertTriangle className="w-6 h-6 text-orange-500" />
+                {arError}
+              </>
+            ) : (
+              <>
+                <Box className="w-6 h-6 text-orange-500" />
+                VIEW IN YOUR SPACE
+              </>
+            )}
           </button>
+        )}
+        {isLoaded && arStatus === 'ready' && !arModes.includes('webxr') && arModes.includes('scene-viewer') && (
+          <Button
+            variant="outline"
+            asChild
+            className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white/90 text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-[100] border-2 border-orange-500/50 hover:border-orange-500 pointer-events-auto"
+          >
+            <a href={`https://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(src)}`} target='_blank' rel='noopener'>
+              <Box className="w-6 h-6 text-orange-500" />
+              Open Scene Viewer
+            </a>
+          </Button>
         )}
         {isLoaded && arStatus === 'unsupported' && (
           <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 z-30">
