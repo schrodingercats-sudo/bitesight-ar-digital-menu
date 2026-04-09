@@ -57,10 +57,12 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         src={src}
         alt={alt}
         poster={poster}
+        ios-src={poster || ''}
         loading="eager"
         reveal="auto"
         ar
         ar-modes="webxr scene-viewer quick-look"
+        webxr-modes="ar"
         auto-rotate={!isPanning}
         camera-controls={!isPanning}
         rotation-per-second="10deg"
@@ -75,7 +77,8 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         {arSupported && isLoaded && arStatus !== 'session-started' && (
           <button
             slot="ar-button"
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-10 border-none text-lg"
+            onClick={() => modelRef.current?.activateAR()}
+            className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-[100] border-none text-lg pointer-events-auto"
           >
             <Box className="w-6 h-6 text-orange-500" />
             VIEW IN YOUR SPACE
