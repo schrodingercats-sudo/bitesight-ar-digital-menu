@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
-import { SwipePanContext } from './SwipeNavigation';
 import { SwipePanContext } from './SwipePanContext';
 import { Smartphone, RefreshCw, Box, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,8 +21,12 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
     if (!customElements.get('model-viewer')) {
       import('@google/model-viewer');
     }
+  }, []);
+
+  useEffect(() => {
     const modelViewer = modelRef.current;
     if (!modelViewer) return;
+
     const handleLoad = () => setIsLoaded(true);
     const handleError = () => console.error('Model failed to load:', src);
     const handleArStatus = (event: any) => {
@@ -33,9 +36,11 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
         setArStatus('session-started');
       }
     };
+
     modelViewer.addEventListener('load', handleLoad);
     modelViewer.addEventListener('error', handleError);
     modelViewer.addEventListener('ar-status', handleArStatus);
+
     return () => {
       modelViewer.removeEventListener('load', handleLoad);
       modelViewer.removeEventListener('error', handleError);
