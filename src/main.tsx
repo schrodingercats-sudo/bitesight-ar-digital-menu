@@ -13,7 +13,8 @@ if (typeof window !== 'undefined') {
         'Falling back to next ar-mode',
         'WebXR denied',
         'scheduled an update',
-        'supportsPresentation'
+        'supportsPresentation',
+        'rAF timed out in updateSource'
       ].some(text => msg.includes(text));
       if (isSuppressed) return;
     }

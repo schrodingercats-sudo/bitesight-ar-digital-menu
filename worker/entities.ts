@@ -26,43 +26,43 @@ export class MenuItemEntity extends IndexedEntity<MenuItem> {
     },
     {
       id: 'm2',
-      name: 'Truffle Wagyu Burger',
-      description: 'Juicy Wagyu beef patty, black truffle aioli, aged cheddar, and caramelized onions on a toasted brioche bun.',
-      price: 22.00,
+      name: 'Grande Beef Burrito',
+      description: 'Slow-cooked seasoned beef, lime-cilantro rice, black beans, and fresh pico de gallo wrapped in a toasted flour tortilla.',
+      price: 18.00,
       category: 'Mains',
-      imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop',
-      glbUrl: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
-      dietaryTags: ['Premium', 'Chef’s Special']
+      imageUrl: 'https://images.unsplash.com/photo-1574484284002-952d92456975?q=80&w=800&auto=format&fit=crop',
+      glbUrl: 'https://hrdlmntptsiaswkxozlg.supabase.co/storage/v1/object/public/models/burrito.glb',
+      dietaryTags: ['Filling', 'Protein Rich']
     },
     {
       id: 'm3',
-      name: 'Wild Mushroom Risotto',
-      description: 'Creamy Arborio rice with a medley of wild mushrooms, parmigiano reggiano, and a hint of truffle oil.',
-      price: 18.50,
+      name: 'Traditional Meat Lasagna',
+      description: 'Layers of rich bolognese sauce, creamy béchamel, and silky pasta sheets topped with melted mozzarella and parmesan.',
+      price: 21.50,
       category: 'Mains',
-      imageUrl: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?q=80&w=800&auto=format&fit=crop',
-      glbUrl: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb',
-      dietaryTags: ['Vegetarian', 'Gluten-Free']
+      imageUrl: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=800&auto=format&fit=crop',
+      glbUrl: 'https://hrdlmntptsiaswkxozlg.supabase.co/storage/v1/object/public/models/lasagna.glb',
+      dietaryTags: ['Comfort Food', 'Classic']
     },
     {
       id: 'm4',
-      name: 'Burrata & Heirloom Tomato',
-      description: 'Creamy burrata cheese with colorful heirloom tomatoes, fresh basil, and balsamic glaze reduction.',
-      price: 16.00,
+      name: 'Flame-Grilled Meat Skewers',
+      description: 'Tender marinated meat cubes grilled over open flames, served with a zesty herb dipping sauce and charred lemon.',
+      price: 16.50,
       category: 'Starters',
-      imageUrl: 'https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?q=80&w=800&auto=format&fit=crop',
-      glbUrl: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/WaterBottle/glTF-Binary/WaterBottle.glb',
-      dietaryTags: ['Vegetarian', 'Local']
+      imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop',
+      glbUrl: 'https://hrdlmntptsiaswkxozlg.supabase.co/storage/v1/object/public/models/meat_skewer.glb',
+      dietaryTags: ['Grilled', 'Keto-Friendly']
     },
     {
-      id: 'm5',
-      name: 'Matcha Lava Cake',
-      description: 'Warm matcha green tea cake with a molten chocolate center, served with vanilla bean gelato.',
-      price: 12.00,
-      category: 'Desserts',
-      imageUrl: 'https://images.unsplash.com/photo-1547414368-ac9469279589?q=80&w=800&auto=format&fit=crop',
-      glbUrl: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
-      dietaryTags: ['Sweet', 'AR Ready']
+      id: 'm6',
+      name: 'Golden Chicken Nuggets',
+      description: 'Crispy, breaded chicken breast pieces fried to golden perfection. Served with our signature honey mustard sauce.',
+      price: 9.50,
+      category: 'Sides',
+      imageUrl: 'https://images.unsplash.com/photo-1562967914-608f82629710?q=80&w=800&auto=format&fit=crop',
+      glbUrl: 'https://hrdlmntptsiaswkxozlg.supabase.co/storage/v1/object/public/models/chicken_nugget.glb',
+      dietaryTags: ['Kids Choice', 'Crispy']
     }
   ];
 }
