@@ -3,16 +3,19 @@ import { persist } from 'zustand/middleware';
 import type { MenuItem, CartItem } from '@shared/types';
 interface CartState {
   items: CartItem[];
+  placedOrderIds: string[];
   addItem: (item: MenuItem) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
+  addPlacedOrder: (orderId: string) => void;
   getTotal: () => number;
 }
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      placedOrderIds: [],
       addItem: (item) => set((state) => {
         const existing = state.items.find((i) => i.id === item.id);
         if (existing) {
@@ -33,10 +36,13 @@ export const useCartStore = create<CartState>()(
           .filter((i) => i.quantity > 0),
       })),
       clearCart: () => set({ items: [] }),
+      addPlacedOrder: (orderId) => set((state) => ({
+        placedOrderIds: [...state.placedOrderIds, orderId]
+      })),
       getTotal: () => {
         return get().items.reduce((total, item) => total + item.price * item.quantity, 0);
       },
     }),
-    { name: 'bitesight-cart' }
+    { name: 'bitesight-cart-v2' }
   )
 );

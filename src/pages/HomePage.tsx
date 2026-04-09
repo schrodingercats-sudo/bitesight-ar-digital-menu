@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Search, Menu as MenuIcon } from 'lucide-react';
+import { ShoppingCart, Search, Menu as MenuIcon, ReceiptText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,18 +11,23 @@ import type { MenuItem } from '@shared/types';
 import { MenuItemCard } from '@/components/MenuItemCard';
 import { ItemDetailsDrawer } from '@/components/ItemDetailsDrawer';
 import { CartSheet } from '@/components/CartSheet';
+import { OrderHistorySheet } from '@/components/OrderHistorySheet';
 import { MenuSkeleton } from '@/components/MenuSkeleton';
 import { useCartStore } from '@/store/useCartStore';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { api } from '@/lib/api-client';
 export function HomePage() {
+  const [searchParams] = useSearchParams();
+  const tableNumber = searchParams.get('table') || 'Table 01';
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeItem, setActiveItem] = useState<MenuItem | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const cartItems = useCartStore((s) => s.items);
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const placedOrderIds = useCartStore((s) => s.placedOrderIds);
   const { data: menuItems = [], isLoading, isError } = useQuery<MenuItem[]>({
     queryKey: ['menu'],
     queryFn: () => api<MenuItem[]>('/api/menu'),
@@ -40,7 +46,10 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-[#EA580C] flex items-center justify-center text-white font-bold">B</div>
-            <h1 className="font-display font-bold text-xl tracking-tight hidden sm:block">BiteSight</h1>
+            <div>
+              <h1 className="font-display font-bold text-lg tracking-tight leading-none">BiteSight</h1>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{tableNumber}</span>
+            </div>
           </div>
           <div className="flex-1 max-w-sm mx-4 relative hidden md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -59,10 +68,10 @@ export function HomePage() {
           </div>
         </div>
       </header>
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 pb-24">
         <div className="mb-8 mt-2">
           <h2 className="text-3xl font-display font-bold text-foreground">Dine in 3D</h2>
-          <p className="text-muted-foreground">Scan your table to see your food before you order.</p>
+          <p className="text-muted-foreground text-pretty">Select a dish to see it on your table in augmented reality.</p>
         </div>
         <div className="md:hidden mb-6 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -73,7 +82,7 @@ export function HomePage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex overflow-x-auto pb-4 gap-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 mb-6">
+        <div className="flex overflow-x-auto pb-4 gap-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 mb-6 sticky top-16 z-30 bg-[#FAFAF9]/50 dark:bg-[#18181B]/50 backdrop-blur-sm pt-2">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -81,7 +90,7 @@ export function HomePage() {
               className={cn(
                 "px-5 py-2.5 rounded-full whitespace-nowrap text-sm font-medium transition-all",
                 selectedCategory === cat
-                  ? "bg-[#EA580C] text-white shadow-md shadow-orange-500/20"
+                  ? "bg-[#EA580C] text-white shadow-lg shadow-orange-500/30 scale-105"
                   : "bg-white dark:bg-zinc-900 text-muted-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800"
               )}
             >
@@ -96,7 +105,7 @@ export function HomePage() {
             ))}
           </div>
         ) : isError ? (
-          <div className="text-center py-20 bg-muted/20 rounded-2xl">
+          <div className="text-center py-20 bg-muted/20 rounded-2xl border-2 border-dashed">
             <p className="text-destructive font-medium">Failed to load menu items. Please try again.</p>
           </div>
         ) : (
@@ -128,7 +137,15 @@ export function HomePage() {
           </>
         )}
       </main>
-      <div className="fixed bottom-6 right-6 z-40">
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+        {placedOrderIds.length > 0 && (
+          <Button
+            onClick={() => setIsHistoryOpen(true)}
+            className="h-14 w-14 rounded-full bg-white dark:bg-zinc-900 text-foreground hover:bg-zinc-50 shadow-xl flex items-center justify-center p-0 border"
+          >
+            <ReceiptText className="w-6 h-6" />
+          </Button>
+        )}
         <Button
           onClick={() => setIsCartOpen(true)}
           className="h-16 w-16 rounded-full bg-[#EA580C] hover:bg-[#C2410C] shadow-2xl flex items-center justify-center p-0 transition-transform active:scale-90"
@@ -151,6 +168,11 @@ export function HomePage() {
       <CartSheet
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
+        tableNumber={tableNumber}
+      />
+      <OrderHistorySheet
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
       />
     </div>
   );
