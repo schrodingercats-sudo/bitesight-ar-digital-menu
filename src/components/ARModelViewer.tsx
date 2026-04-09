@@ -1,25 +1,80 @@
 import React, { useEffect, useRef } from 'react';
 import { Smartphone } from 'lucide-react';
+
 interface ARModelViewerProps {
   src: string;
   alt: string;
+  poster?: string;
   className?: string;
 }
-export function ARModelViewer({ src, alt, className }: ARModelViewerProps) {
+
+export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProps) {
   const modelRef = useRef<HTMLElement>(null);
+  const [isLoaded, setIsLoaded] = React.useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && !customElements.get('model-viewer')) {
-      (window as any).litDisableDevMode = true;
-      import('@google/model-viewer');
-    }
+    if (typeof window === 'undefined' || customElements.get('model-viewer')) return;
+
+    const prevError = console.error.bind(console.error);
+    const prevWarn = console.warn.bind(console.warn);
+
+    console.error = (...args) => {
+      const msg = args[0];
+      if (typeof msg === 'string' && (
+        msg.includes('Lit is in dev mode') ||
+        msg.includes('scheduled an update') ||
+        msg.includes('WebXR') ||
+        msg.includes('ar-mode') ||
+        msg.includes('Falling back')
+      )) return;
+      if (typeof msg === 'object' && msg && msg.response !== undefined) return;
+      prevError(...args);
+    };
+
+    console.warn = (...args) => {
+      const msg = args[0];
+      if (typeof msg === 'string' && (
+        msg.includes('Lit is in dev mode') ||
+        msg.includes('scheduled an update') ||
+        msg.includes('WebXR') ||
+        msg.includes('ar-mode') ||
+        msg.includes('Falling back')
+      )) return;
+      if (typeof msg === 'object' && msg && msg.response !== undefined) return;
+      prevWarn(...args);
+    };
+
+    (window as any).litDisableDevMode = true;
+    import('@google/model-viewer');
+
+    return () => {
+      console.error = prevError;
+      console.warn = prevWarn;
+    };
   }, []);
+
+  React.useEffect(() => {
+    const modelViewer = modelRef.current;
+    if (!modelViewer) return;
+
+    const handleLoad = () => setIsLoaded(true);
+    modelViewer.addEventListener('load', handleLoad);
+
+    return () => {
+      if (modelViewer) {
+        modelViewer.removeEventListener('load', handleLoad);
+      }
+    };
+  }, [modelRef]);
+
   return (
     <div className={`relative w-full aspect-square bg-muted/30 rounded-2xl overflow-hidden border border-border/50 group ${className}`}>
       <model-viewer
         ref={modelRef as any}
         src={src}
         alt={alt}
+        poster={poster}
+        loading="lazy"
         ar
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
@@ -29,7 +84,7 @@ export function ARModelViewer({ src, alt, className }: ARModelViewerProps) {
         shadow-softness="1"
         exposure="1"
         environment-image="neutral"
-        style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
+        style={{ width: '100%', height: '100%', minHeight: '100%', backgroundColor: 'transparent' }}
       >
         <button
           slot="ar-button"
@@ -42,7 +97,13 @@ export function ARModelViewer({ src, alt, className }: ARModelViewerProps) {
           <Smartphone className="w-3 h-3" />
           AR requires mobile
         </div>
+        {!isLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-gradient-to-b from-muted/80 to-transparent">
+            <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+          </div>
+        )}
       </model-viewer>
     </div>
   );
 }
+//

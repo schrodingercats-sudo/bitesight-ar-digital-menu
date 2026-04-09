@@ -34,7 +34,7 @@ export function ItemDetailsDrawer({ item, isOpen, onClose }: ItemDetailsDrawerPr
           <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 py-6">
             <div className="w-full">
               {item.glbUrl ? (
-                <ARModelViewer src={item.glbUrl} alt={item.name} />
+                <ARModelViewer src={item.glbUrl} alt={item.name} poster={item.imageUrl} />
               ) : (
                 <div className="aspect-video w-full rounded-2xl overflow-hidden bg-muted border border-border/50 shadow-inner">
                   <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover transition-transform hover:scale-105 duration-700" />

@@ -21,7 +21,7 @@ export class MenuItemEntity extends IndexedEntity<MenuItem> {
       price: 14.50,
       category: 'Starters',
       imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800&auto=format&fit=crop',
-      glbUrl: 'https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Avocado/glTF-Binary/Avocado.glb',
+      glbUrl: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb',
       dietaryTags: ['Vegetarian', 'Healthy']
     },
     {
