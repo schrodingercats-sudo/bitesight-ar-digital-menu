@@ -1,7 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { useState, useCallback, ReactNode } from 'react';
 import { motion, PanInfo } from 'framer-motion';
-
-export const SwipePanContext = createContext<{ isPanning: boolean } | null>(null);
+import { SwipePanContext } from './SwipePanContext';
 interface SwipeNavigationProps {
   children: ReactNode;
   onSwipeLeft: () => void;
@@ -9,10 +8,9 @@ interface SwipeNavigationProps {
 }
 export function SwipeNavigation({ children, onSwipeLeft, onSwipeRight }: SwipeNavigationProps) {
   const [isPanning, setIsPanning] = useState(false);
-
   const handlePanEnd = useCallback((_: any, info: PanInfo) => {
     const threshold = 50;
-    const velocityThreshold = 800; // increase for fast spin detect
+    const velocityThreshold = 800;
     if (info.offset.x < -threshold || info.velocity.x < -velocityThreshold) {
       onSwipeLeft();
     } else if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {

@@ -7,14 +7,14 @@ import type { MenuItem } from '@shared/types';
 import { ImmersiveCard } from '@/components/ImmersiveCard';
 import { GesturalOverlay } from '@/components/GesturalOverlay';
 import { SwipeNavigation } from '@/components/SwipeNavigation';
-import { CartSheet } from '@/components/CartSheet';
+import { OrderSheet } from '@/components/OrderSheet';
 import { OrderHistorySheet } from '@/components/OrderHistorySheet';
 import { Loader2 } from 'lucide-react';
 export function HomePage() {
   const [searchParams] = useSearchParams();
   const tableNumber = searchParams.get('table') || 'Table 01';
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isOrderOpen, setIsOrderOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [direction, setDirection] = useState(0);
   const { data: menuItems = [], isLoading, isError, refetch } = useQuery<MenuItem[]>({
@@ -22,13 +22,11 @@ export function HomePage() {
     queryFn: () => api<MenuItem[]>('/api/menu'),
     staleTime: 600000,
   });
-  // Preload next and previous models
   useEffect(() => {
     if (menuItems.length === 0) return;
     const preload = (index: number) => {
       const item = menuItems[index];
       if (item?.glbUrl) {
-        // Check if link already exists to prevent duplicates
         if (!document.querySelector(`link[href="${item.glbUrl}"]`)) {
           const link = document.createElement('link');
           link.rel = 'preload';
@@ -92,13 +90,7 @@ export function HomePage() {
   if (isError || menuItems.length === 0) {
     return (
       <div className="h-[100dvh] flex flex-col items-center justify-center bg-zinc-950 p-6 text-center">
-        <div className="w-20 h-20 bg-zinc-900 rounded-[2.5rem] flex items-center justify-center mb-6">
-          <Loader2 className="w-10 h-10 text-orange-500 opacity-20" />
-        </div>
         <h2 className="text-2xl font-black text-white mb-2">Menu Unavailable</h2>
-        <p className="text-zinc-500 font-medium max-w-xs leading-relaxed mb-8">
-          Unable to load menu data. Please try again.
-        </p>
         <button
           onClick={() => refetch()}
           className="bg-white text-black px-8 py-3 rounded-full font-black text-sm uppercase tracking-widest active:scale-95 transition-all"
@@ -133,14 +125,14 @@ export function HomePage() {
       </SwipeNavigation>
       <GesturalOverlay
         tableNumber={tableNumber}
-        onOpenCart={() => setIsCartOpen(true)}
+        onOpenCart={() => setIsOrderOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
         currentIndex={activeIndex}
         totalItems={menuItems.length}
       />
-      <CartSheet
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
+      <OrderSheet
+        isOpen={isOrderOpen}
+        onClose={() => setIsOrderOpen(false)}
         tableNumber={tableNumber}
       />
       <OrderHistorySheet

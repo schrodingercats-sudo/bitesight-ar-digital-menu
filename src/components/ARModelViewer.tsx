@@ -17,16 +17,13 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
   const isPanning = !!ctx?.isPanning;
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    // Load custom element if not already loaded
     if (!customElements.get('model-viewer')) {
       import('@google/model-viewer');
     }
   }, []);
-
   useEffect(() => {
     const modelViewer = modelRef.current;
     if (!modelViewer) return;
-
     const handleLoad = () => setIsLoaded(true);
     const handleError = () => console.error('Model failed to load:', src);
     const handleArStatus = (event: any) => {
@@ -36,11 +33,9 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
         setArStatus('session-started');
       }
     };
-
     modelViewer.addEventListener('load', handleLoad);
     modelViewer.addEventListener('error', handleError);
     modelViewer.addEventListener('ar-status', handleArStatus);
-
     return () => {
       modelViewer.removeEventListener('load', handleLoad);
       modelViewer.removeEventListener('error', handleError);
@@ -88,7 +83,7 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
         {arStatus === 'failed' && (
           <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 z-30 animate-bounce">
             <AlertTriangle className="w-4 h-4" />
-            AR not supported on this device
+            AR not supported
           </div>
         )}
         {isLoaded && hasInteracted && (
@@ -101,10 +96,6 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
             <RefreshCw className="w-5 h-5" />
           </Button>
         )}
-        <div className="absolute top-6 right-6 hidden md:flex items-center gap-3 px-4 py-2 bg-black/40 backdrop-blur-md rounded-2xl text-[11px] font-black text-white/80 border border-white/10 shadow-sm uppercase tracking-widest">
-          <Box className="w-4 h-4 text-orange-500" />
-          Desktop 3D Preview
-        </div>
         {!isLoaded && (
           <div className="absolute inset-0 flex items-center justify-center z-10 bg-black">
             <div className="flex flex-col items-center gap-4">
