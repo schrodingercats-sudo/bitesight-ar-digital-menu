@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -22,6 +22,23 @@ export function HomePage() {
     queryFn: () => api<MenuItem[]>('/api/menu'),
     staleTime: 600000,
   });
+  // Preload next and previous models
+  useEffect(() => {
+    if (menuItems.length === 0) return;
+    const preload = (index: number) => {
+      const item = menuItems[index];
+      if (item?.glbUrl) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'fetch';
+        link.href = item.glbUrl;
+        link.crossOrigin = 'anonymous';
+        document.head.appendChild(link);
+      }
+    };
+    if (activeIndex < menuItems.length - 1) preload(activeIndex + 1);
+    if (activeIndex > 0) preload(activeIndex - 1);
+  }, [activeIndex, menuItems]);
   const nextItem = useCallback(() => {
     if (activeIndex < menuItems.length - 1) {
       setDirection(1);
@@ -38,7 +55,7 @@ export function HomePage() {
     enter: (direction: number) => ({
       x: direction > 0 ? '100%' : '-100%',
       opacity: 0,
-      scale: 0.9,
+      scale: 0.95,
     }),
     center: {
       zIndex: 1,
@@ -50,26 +67,41 @@ export function HomePage() {
       zIndex: 0,
       x: direction < 0 ? '100%' : '-100%',
       opacity: 0,
-      scale: 0.9,
+      scale: 0.95,
     })
   };
   if (isLoading) {
     return (
       <div className="h-[100dvh] flex items-center justify-center bg-black">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-        >
-          <Loader2 className="w-10 h-10 text-orange-500" />
-        </motion.div>
+        <div className="flex flex-col items-center gap-6">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+            className="w-16 h-16 border-4 border-orange-500/20 border-t-orange-500 rounded-full"
+          />
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500 animate-pulse">
+            Setting the Table
+          </p>
+        </div>
       </div>
     );
   }
   if (isError || menuItems.length === 0) {
     return (
       <div className="h-[100dvh] flex flex-col items-center justify-center bg-zinc-950 p-6 text-center">
-        <h2 className="text-2xl font-black text-white mb-2">Menu Unavailable</h2>
-        <p className="text-zinc-400 max-w-xs">The kitchen might be closed or the signal is weak. Try refreshing.</p>
+        <div className="w-20 h-20 bg-zinc-900 rounded-[2.5rem] flex items-center justify-center mb-6">
+          <Loader2 className="w-10 h-10 text-orange-500 opacity-20" />
+        </div>
+        <h2 className="text-2xl font-black text-white mb-2">Kitchen Offline</h2>
+        <p className="text-zinc-500 font-medium max-w-xs leading-relaxed mb-8">
+          We couldn't reach the menu. Please check your connection or signal your server.
+        </p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-white text-black px-8 py-3 rounded-full font-black text-sm uppercase tracking-widest active:scale-95 transition-all"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -86,7 +118,7 @@ export function HomePage() {
             animate="center"
             exit="exit"
             transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
+              x: { type: "spring", stiffness: 350, damping: 35 },
               opacity: { duration: 0.3 },
               scale: { duration: 0.4 }
             }}

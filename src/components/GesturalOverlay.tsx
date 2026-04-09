@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useCartStore } from '@/store/useCartStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useShallow } from 'zustand/react/shallow';
 interface GesturalOverlayProps {
   tableNumber: string;
   onOpenCart: () => void;
@@ -12,20 +13,35 @@ interface GesturalOverlayProps {
   totalItems: number;
 }
 export function GesturalOverlay({ tableNumber, onOpenCart, onOpenHistory, currentIndex, totalItems }: GesturalOverlayProps) {
-  const items = useCartStore((s) => s.items);
-  const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
-  const placedOrderIds = useCartStore((s) => s.placedOrderIds);
+  const cartItems = useCartStore(useShallow((s) => s.items));
+  const placedOrderIds = useCartStore(useShallow((s) => s.placedOrderIds));
   const [showHint, setShowHint] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   useEffect(() => {
+    if (hasInteracted) {
+      setShowHint(false);
+      return;
+    }
     const timer = setTimeout(() => {
       if (currentIndex === 0) setShowHint(true);
     }, 5000);
     return () => clearTimeout(timer);
-  }, [currentIndex]);
+  }, [currentIndex, hasInteracted]);
+  // Global listener to track any touch/click to dismiss hint permanently
+  useEffect(() => {
+    const dismiss = () => setHasInteracted(true);
+    window.addEventListener('touchstart', dismiss);
+    window.addEventListener('mousedown', dismiss);
+    return () => {
+      window.removeEventListener('touchstart', dismiss);
+      window.removeEventListener('mousedown', dismiss);
+    };
+  }, []);
   return (
     <div className="absolute inset-0 z-30 pointer-events-none flex flex-col justify-between p-6 sm:p-10 max-w-7xl mx-auto w-full left-1/2 -translate-x-1/2">
       {/* Top Header */}
-      <motion.div 
+      <motion.div
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="flex justify-between items-start pointer-events-auto"
@@ -55,30 +71,38 @@ export function GesturalOverlay({ tableNumber, onOpenCart, onOpenHistory, curren
       </motion.div>
       {/* Navigation Indicators */}
       <div className="flex-1 flex items-center justify-between px-2">
-        <div className="w-10">
+        <div className="w-12 flex justify-start">
           {currentIndex > 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0.2, 0.5, 0.2] }} transition={{ repeat: Infinity, duration: 2 }}>
-              <ChevronLeft className="w-10 h-10 text-white" />
+            <motion.div 
+              initial={{ opacity: 0, x: 10 }} 
+              animate={{ opacity: [0.1, 0.3, 0.1], x: 0 }} 
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
+              <ChevronLeft className="w-10 h-10 text-white/50" />
             </motion.div>
           )}
         </div>
         <AnimatePresence>
           {showHint && (
-            <motion.div 
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-black/60 backdrop-blur-md px-6 py-3 rounded-full border border-white/20 flex items-center gap-3"
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 10 }}
+              className="bg-black/80 backdrop-blur-xl px-8 py-4 rounded-full border border-white/10 flex items-center gap-3 shadow-2xl"
             >
-              <Hand className="w-5 h-5 text-orange-400 animate-bounce" />
-              <span className="text-white font-black text-xs uppercase tracking-widest">Swipe to Explore</span>
+              <Hand className="w-5 h-5 text-orange-500 animate-bounce" />
+              <span className="text-white font-black text-xs uppercase tracking-[0.2em]">Swipe to Explore</span>
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="w-10">
+        <div className="w-12 flex justify-end">
           {currentIndex < totalItems - 1 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0.2, 0.5, 0.2] }} transition={{ repeat: Infinity, duration: 2 }}>
-              <ChevronRight className="w-10 h-10 text-white" />
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }} 
+              animate={{ opacity: [0.1, 0.3, 0.1], x: 0 }} 
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
+              <ChevronRight className="w-10 h-10 text-white/50" />
             </motion.div>
           )}
         </div>
@@ -91,11 +115,11 @@ export function GesturalOverlay({ tableNumber, onOpenCart, onOpenHistory, curren
                <motion.div
                  key={i}
                  initial={false}
-                 animate={{ 
+                 animate={{
                    width: i === currentIndex ? 32 : 8,
-                   backgroundColor: i === currentIndex ? "rgba(234, 88, 12, 1)" : "rgba(255, 255, 255, 0.3)" 
+                   backgroundColor: i === currentIndex ? "rgba(234, 88, 12, 1)" : "rgba(255, 255, 255, 0.2)"
                  }}
-                 className="h-2 rounded-full transition-all duration-300"
+                 className="h-1.5 rounded-full transition-all duration-500"
                />
              ))}
            </div>
