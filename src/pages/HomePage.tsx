@@ -7,15 +7,10 @@ import type { MenuItem } from '@shared/types';
 import { ImmersiveCard } from '@/components/ImmersiveCard';
 import { GesturalOverlay } from '@/components/GesturalOverlay';
 import { SwipeNavigation } from '@/components/SwipeNavigation';
-import { OrderSheet } from '@/components/OrderSheet';
-import { OrderHistorySheet } from '@/components/OrderHistorySheet';
-import { Loader2 } from 'lucide-react';
 export function HomePage() {
   const [searchParams] = useSearchParams();
   const tableNumber = searchParams.get('table') || 'Table 01';
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isOrderOpen, setIsOrderOpen] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [direction, setDirection] = useState(0);
   const { data: menuItems = [], isLoading, isError, refetch } = useQuery<MenuItem[]>({
     queryKey: ['menu'],
@@ -73,7 +68,7 @@ export function HomePage() {
   };
   if (isLoading) {
     return (
-      <div className="h-[100dvh] flex items-center justify-center bg-black">
+      <div className="h-[100dvh] flex items-center justify-center bg-black text-white">
         <div className="flex flex-col items-center gap-6">
           <motion.div
             animate={{ rotate: 360 }}
@@ -125,19 +120,8 @@ export function HomePage() {
       </SwipeNavigation>
       <GesturalOverlay
         tableNumber={tableNumber}
-        onOpenCart={() => setIsOrderOpen(true)}
-        onOpenHistory={() => setIsHistoryOpen(true)}
         currentIndex={activeIndex}
         totalItems={menuItems.length}
-      />
-      <OrderSheet
-        isOpen={isOrderOpen}
-        onClose={() => setIsOrderOpen(false)}
-        tableNumber={tableNumber}
-      />
-      <OrderHistorySheet
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
       />
     </div>
   );

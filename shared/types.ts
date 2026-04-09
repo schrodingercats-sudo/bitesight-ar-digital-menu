@@ -17,22 +17,6 @@ export interface MenuItem {
   glbUrl?: string;
   dietaryTags: string[];
 }
-export interface CartItem extends MenuItem {
-  quantity: number;
-}
-export type OrderStatus = 'pending' | 'completed' | 'cancelled';
-export interface Order {
-  id: string;
-  items: CartItem[];
-  total: number;
-  status: OrderStatus;
-  tableNumber: string;
-  timestamp: number;
-}
-export interface OrderRequest {
-  items: CartItem[];
-  tableNumber: string;
-}
 export interface Chat {
   id: string;
   title: string;

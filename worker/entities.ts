@@ -1,5 +1,5 @@
 import { IndexedEntity } from "./core-utils";
-import type { MenuItem, Order } from "@shared/types";
+import type { MenuItem } from "@shared/types";
 export class MenuItemEntity extends IndexedEntity<MenuItem> {
   static readonly entityName = "menu-item";
   static readonly indexName = "menu-items";
@@ -65,16 +65,4 @@ export class MenuItemEntity extends IndexedEntity<MenuItem> {
       dietaryTags: ['Sweet', 'AR Ready']
     }
   ];
-}
-export class OrderEntity extends IndexedEntity<Order> {
-  static readonly entityName = "order";
-  static readonly indexName = "orders";
-  static readonly initialState: Order = {
-    id: "",
-    items: [],
-    total: 0,
-    status: 'pending',
-    tableNumber: "",
-    timestamp: 0
-  };
 }

@@ -3,26 +3,28 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, Dr
 import { Button } from '@/components/ui/button';
 import { ARModelViewer } from './ARModelViewer';
 import type { MenuItem } from '@shared/types';
-import { useOrderStore } from '@/store/useOrderStore';
-import { Minus, Plus, ShoppingBag } from 'lucide-react';
+import { X } from 'lucide-react';
 interface ItemDetailsDrawerProps {
   item: MenuItem | null;
   isOpen: boolean;
   onClose: () => void;
 }
 export function ItemDetailsDrawer({ item, isOpen, onClose }: ItemDetailsDrawerProps) {
-  const addToOrder = useOrderStore((s) => s.addToOrder);
-  const items = useOrderStore((s) => s.items);
-  const updateQuantity = useOrderStore((s) => s.updateQuantity);
   if (!item) return null;
-  const cartItem = items.find((i) => i.id === item.id);
-  const quantity = cartItem?.quantity ?? 0;
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent className="max-h-[95dvh] md:max-h-[85dvh]">
         <div className="mx-auto w-full max-w-2xl overflow-y-auto px-6 pb-12 sm:pb-8">
-          <DrawerHeader className="px-0 pt-8">
-            <DrawerTitle className="text-3xl font-black tracking-tighter sm:text-4xl">{item.name}</DrawerTitle>
+          <DrawerHeader className="px-0 pt-8 relative">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute right-0 top-8 rounded-full" 
+              onClick={onClose}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+            <DrawerTitle className="text-3xl font-black tracking-tighter sm:text-4xl pr-12">{item.name}</DrawerTitle>
             <DrawerDescription className="text-lg font-medium text-orange-600">
               {item.category} • ${item.price.toFixed(2)}
             </DrawerDescription>
@@ -46,17 +48,9 @@ export function ItemDetailsDrawer({ item, isOpen, onClose }: ItemDetailsDrawerPr
             </div>
           </div>
           <DrawerFooter className="px-0 pt-8 sticky bottom-0 bg-background/80 backdrop-blur-md pb-6">
-            {quantity > 0 ? (
-              <div className="flex items-center gap-6 bg-muted/60 border border-border/50 rounded-full p-1.5 h-16 w-full max-w-md mx-auto">
-                <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full" onClick={() => updateQuantity(item.id, -1)}><Minus className="w-5 h-5" /></Button>
-                <span className="font-black text-2xl w-10 text-center">{quantity}</span>
-                <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full" onClick={() => updateQuantity(item.id, 1)}><Plus className="w-5 h-5" /></Button>
-              </div>
-            ) : (
-              <Button className="h-16 w-full rounded-full text-xl font-black bg-orange-600 hover:bg-orange-700 max-w-md mx-auto" onClick={() => addToOrder(item)}>
-                <ShoppingBag className="mr-3 h-6 w-6" /> Add to Order
-              </Button>
-            )}
+            <Button variant="outline" className="h-16 w-full rounded-full text-xl font-black border-2 border-orange-600 text-orange-600 hover:bg-orange-50" onClick={onClose}>
+              Back to Menu
+            </Button>
           </DrawerFooter>
         </div>
       </DrawerContent>

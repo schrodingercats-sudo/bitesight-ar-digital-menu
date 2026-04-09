@@ -1,22 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { ShoppingBag, ReceiptText, ChevronLeft, ChevronRight, Hand } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, Hand } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { useOrderStore } from '@/store/useOrderStore';
 import { motion, AnimatePresence } from 'framer-motion';
 interface GesturalOverlayProps {
   tableNumber: string;
-  onOpenCart: () => void;
-  onOpenHistory: () => void;
   currentIndex: number;
   totalItems: number;
 }
-export function GesturalOverlay({ tableNumber, onOpenCart, onOpenHistory, currentIndex, totalItems }: GesturalOverlayProps) {
-  const items = useOrderStore((s) => s.items);
-  const placedOrderIds = useOrderStore((s) => s.placedOrderIds);
+export function GesturalOverlay({ tableNumber, currentIndex, totalItems }: GesturalOverlayProps) {
   const [showHint, setShowHint] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const orderCount = items.reduce((acc, item) => acc + item.quantity, 0);
   useEffect(() => {
     if (hasInteracted) {
       setShowHint(false);
@@ -53,16 +46,6 @@ export function GesturalOverlay({ tableNumber, onOpenCart, onOpenHistory, curren
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {placedOrderIds.length > 0 && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onOpenHistory}
-              className="h-14 w-14 rounded-full bg-black/40 backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 shadow-xl"
-            >
-              <ReceiptText className="w-7 h-7" />
-            </Button>
-          )}
           <ThemeToggle className="h-14 w-14 rounded-full bg-black/40 backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 shadow-xl" />
         </div>
       </motion.div>
@@ -95,8 +78,8 @@ export function GesturalOverlay({ tableNumber, onOpenCart, onOpenHistory, curren
           )}
         </div>
       </div>
-      <div className="flex justify-between items-end pb-4">
-        <div className="pointer-events-auto bg-black/20 backdrop-blur-sm p-3 rounded-2xl border border-white/5">
+      <div className="flex justify-center items-end pb-4">
+        <div className="pointer-events-auto bg-black/20 backdrop-blur-sm p-3 rounded-full border border-white/5">
            <div className="flex gap-2">
              {Array.from({ length: totalItems }).map((_, i) => (
                <div
@@ -105,26 +88,6 @@ export function GesturalOverlay({ tableNumber, onOpenCart, onOpenHistory, curren
                />
              ))}
            </div>
-        </div>
-        <div className="pointer-events-auto">
-          <Button
-            onClick={onOpenCart}
-            className="h-24 w-24 rounded-full bg-orange-600 hover:bg-orange-700 shadow-[0_20px_50px_rgba(234,88,12,0.3)] relative transition-all hover:scale-110 active:scale-90 border-4 border-white/10"
-          >
-            <ShoppingBag className="w-10 h-10 text-white" />
-            <AnimatePresence>
-              {orderCount > 0 && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  className="absolute -top-1 -right-1 bg-white text-orange-600 w-10 h-10 rounded-full flex items-center justify-center font-black text-sm border-[6px] border-orange-600 shadow-xl"
-                >
-                  {orderCount}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </Button>
         </div>
       </div>
     </div>

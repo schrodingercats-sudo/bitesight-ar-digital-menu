@@ -1,11 +1,9 @@
 import '@/lib/errorReporter';
 import { enableMapSet } from "immer";
 enableMapSet();
-
-if (typeof window !== 'undefined') { 
-  (window as any).litDisableDevMode = true; 
+if (typeof window !== 'undefined') {
+  (window as any).litDisableDevMode = true;
 }
-
 import { createRoot } from 'react-dom/client'
 import {
   createBrowserRouter,
@@ -16,17 +14,11 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import '@/index.css'
 import { HomePage } from '@/pages/HomePage'
-import { KitchenPage } from '@/pages/KitchenPage'
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
     path: "/",
     element: <HomePage />,
-    errorElement: <RouteErrorBoundary />,
-  },
-  {
-    path: "/kitchen",
-    element: <KitchenPage />,
     errorElement: <RouteErrorBoundary />,
   },
 ]);
