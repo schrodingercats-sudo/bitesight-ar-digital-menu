@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import '@google/model-viewer';
 import { Smartphone } from 'lucide-react';
 interface ARModelViewerProps {
   src: string;
@@ -10,8 +9,9 @@ export function ARModelViewer({ src, alt, className }: ARModelViewerProps) {
   const modelRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !customElements.get('model-viewer')) {
       (window as any).litDisableDevMode = true;
+      import('@google/model-viewer');
     }
   }, []);
   return (
