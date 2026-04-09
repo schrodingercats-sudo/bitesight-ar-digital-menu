@@ -1,8 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-// Suppress Lit development mode warnings
-if (typeof window !== 'undefined') {
-  (window as any).litDisableDevMode = true;
-}
 import '@google/model-viewer';
 import { Smartphone } from 'lucide-react';
 interface ARModelViewerProps {
@@ -12,6 +8,12 @@ interface ARModelViewerProps {
 }
 export function ARModelViewer({ src, alt, className }: ARModelViewerProps) {
   const modelRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).litDisableDevMode = true;
+    }
+  }, []);
   return (
     <div className={`relative w-full aspect-square bg-muted/30 rounded-2xl overflow-hidden border border-border/50 group ${className}`}>
       <model-viewer
