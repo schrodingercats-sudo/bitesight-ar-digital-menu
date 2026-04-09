@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
-import { useCartStore } from '@/store/useCartStore';
+import { useOrderStore } from '@/store/useOrderStore';
 import { ReceiptText, Clock, CheckCircle2, Loader2, UtensilsCrossed, ArrowRight, Timer } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +17,7 @@ interface OrderHistorySheetProps {
   onClose: () => void;
 }
 export function OrderHistorySheet({ isOpen, onClose }: OrderHistorySheetProps) {
-  const placedOrderIds = useCartStore(useShallow((s) => s.placedOrderIds));
+  const placedOrderIds = useOrderStore(useShallow((s) => s.placedOrderIds));
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ['my-orders'],
     queryFn: () => api<Order[]>('/api/orders'),
@@ -35,7 +35,9 @@ export function OrderHistorySheet({ isOpen, onClose }: OrderHistorySheetProps) {
             <ReceiptText className="w-7 h-7 text-orange-500" />
             Activity
           </SheetTitle>
-          <SheetDescription className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.3em]">Track your dishes</SheetDescription>
+          <SheetDescription className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.3em]">
+            Track your dishes
+          </SheetDescription>
         </SheetHeader>
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-4">
@@ -49,7 +51,9 @@ export function OrderHistorySheet({ isOpen, onClose }: OrderHistorySheetProps) {
             </div>
             <div className="space-y-3">
               <h4 className="text-3xl font-black tracking-tighter">No orders yet</h4>
-              <p className="text-zinc-500 font-medium leading-relaxed max-w-[240px] mx-auto">Once you confirm your cart, you can track the magic here.</p>
+              <p className="text-zinc-500 font-medium leading-relaxed max-w-[240px] mx-auto">
+                Once you confirm your order, you can track the magic here.
+              </p>
             </div>
             <Button className="h-16 w-full rounded-2xl bg-orange-600 hover:bg-orange-700 font-black text-lg" onClick={onClose}>
               Back to Menu <ArrowRight className="ml-2 w-5 h-5" />
@@ -76,7 +80,13 @@ export function OrderHistorySheet({ isOpen, onClose }: OrderHistorySheetProps) {
                           : "bg-green-500/10 text-green-500"
                       )}
                     >
-                      {order.status === 'pending' && <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ repeat: Infinity, duration: 1.5 }} className="mr-2 inline-block w-1.5 h-1.5 rounded-full bg-orange-500" />}
+                      {order.status === 'pending' && (
+                        <motion.span 
+                          animate={{ opacity: [1, 0.4, 1] }} 
+                          transition={{ repeat: Infinity, duration: 1.5 }} 
+                          className="mr-2 inline-block w-1.5 h-1.5 rounded-full bg-orange-500" 
+                        />
+                      )}
                       {order.status === 'pending' ? 'Preparing' : 'Served'}
                     </Badge>
                   </div>
