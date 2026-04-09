@@ -17,7 +17,7 @@ export function HomePage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [direction, setDirection] = useState(0);
-  const { data: menuItems = [], isLoading, isError } = useQuery<MenuItem[]>({
+  const { data: menuItems = [], isLoading, isError, refetch } = useQuery<MenuItem[]>({
     queryKey: ['menu'],
     queryFn: () => api<MenuItem[]>('/api/menu'),
     staleTime: 600000,
@@ -28,12 +28,15 @@ export function HomePage() {
     const preload = (index: number) => {
       const item = menuItems[index];
       if (item?.glbUrl) {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.as = 'fetch';
-        link.href = item.glbUrl;
-        link.crossOrigin = 'anonymous';
-        document.head.appendChild(link);
+        // Check if link already exists to prevent duplicates
+        if (!document.querySelector(`link[href="${item.glbUrl}"]`)) {
+          const link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'fetch';
+          link.href = item.glbUrl;
+          link.crossOrigin = 'anonymous';
+          document.head.appendChild(link);
+        }
       }
     };
     if (activeIndex < menuItems.length - 1) preload(activeIndex + 1);
@@ -92,12 +95,12 @@ export function HomePage() {
         <div className="w-20 h-20 bg-zinc-900 rounded-[2.5rem] flex items-center justify-center mb-6">
           <Loader2 className="w-10 h-10 text-orange-500 opacity-20" />
         </div>
-        <h2 className="text-2xl font-black text-white mb-2">Kitchen Offline</h2>
+        <h2 className="text-2xl font-black text-white mb-2">Menu Unavailable</h2>
         <p className="text-zinc-500 font-medium max-w-xs leading-relaxed mb-8">
-          We couldn't reach the menu. Please check your connection or signal your server.
+          Unable to load menu data. Please try again.
         </p>
-        <button 
-          onClick={() => window.location.reload()}
+        <button
+          onClick={() => refetch()}
           className="bg-white text-black px-8 py-3 rounded-full font-black text-sm uppercase tracking-widest active:scale-95 transition-all"
         >
           Try Again
