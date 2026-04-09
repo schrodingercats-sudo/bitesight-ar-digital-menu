@@ -2,7 +2,7 @@ import React from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useShallow } from 'zustand/react/shallow';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useCartStore } from '@/store/useCartStore';
 import { Minus, Plus, Trash2, ShoppingBasket, Loader2, Sparkles } from 'lucide-react';
@@ -58,7 +58,7 @@ export function CartSheet({ isOpen, onClose, tableNumber }: CartSheetProps) {
             </div>
             Checkout
           </SheetTitle>
-          <p className="text-zinc-500 font-bold uppercase text-xs tracking-widest">{tableNumber} • Review your feast</p>
+          <SheetDescription className="text-zinc-500 font-bold uppercase text-xs tracking-widest">{tableNumber} • Review your feast</SheetDescription>
         </SheetHeader>
         {items.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-8">

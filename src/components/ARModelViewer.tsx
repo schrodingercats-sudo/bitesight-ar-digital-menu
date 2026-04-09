@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
+import { SwipePanContext } from './SwipeNavigation';
 import { Smartphone, RefreshCw, Box, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 interface ARModelViewerProps {
@@ -12,6 +13,8 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [arStatus, setArStatus] = useState<'not-present' | 'session-started' | 'failed' | 'idle'>('idle');
+  const ctx = useContext(SwipePanContext);
+  const isPanning = !!ctx?.isPanning;
   useEffect(() => {
     if (typeof window === 'undefined') return;
     // Load custom element if not already loaded
@@ -45,7 +48,7 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
     }
   };
   return (
-    <div className={`relative w-full h-full bg-transparent overflow-hidden ${className}`}>
+    <div className={`relative w-full h-full bg-transparent overflow-hidden ${className || ''} ${isPanning ? 'pointer-events-none' : ''}`}>
       <model-viewer
         ref={modelRef}
         src={src}
@@ -55,9 +58,9 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
         reveal="auto"
         ar
         ar-modes="webxr scene-viewer quick-look"
-        camera-controls
+        camera-controls={!isPanning}
         auto-rotate
-        rotation-per-second="30deg"
+        rotation-per-second="10deg"
         interaction-prompt="none"
         shadow-intensity="2"
         shadow-softness="0.8"
@@ -67,13 +70,15 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
         onPointerDown={() => setHasInteracted(true)}
       >
-        <button
-          slot="ar-button"
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-10 border-none text-lg"
-        >
-          <Smartphone className="w-6 h-6 text-orange-500" />
-          VIEW IN YOUR SPACE
-        </button>
+        {arStatus !== 'failed' && (
+          <button
+            slot="ar-button"
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-10 border-none text-lg"
+          >
+            <Smartphone className="w-6 h-6 text-orange-500" />
+            VIEW IN YOUR SPACE
+          </button>
+        )}
         {arStatus === 'failed' && (
           <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 z-30 animate-bounce">
             <AlertTriangle className="w-4 h-4" />

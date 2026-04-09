@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useCartStore } from '@/store/useCartStore';
 import { ReceiptText, Clock, CheckCircle2, Loader2, UtensilsCrossed, ArrowRight, Timer } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -35,7 +35,7 @@ export function OrderHistorySheet({ isOpen, onClose }: OrderHistorySheetProps) {
             <ReceiptText className="w-7 h-7 text-orange-500" />
             Activity
           </SheetTitle>
-          <p className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.3em]">Track your dishes</p>
+          <SheetDescription className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.3em]">Track your dishes</SheetDescription>
         </SheetHeader>
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-4">

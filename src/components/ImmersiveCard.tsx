@@ -29,7 +29,7 @@ export function ImmersiveCard({ item }: ImmersiveCardProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="w-full h-full"
+              className="w-full max-w-4xl mx-auto my-auto h-[80vh] md:h-[60vh] flex items-center justify-center"
             >
               <ARModelViewer
                 src={item.glbUrl}
@@ -44,7 +44,7 @@ export function ImmersiveCard({ item }: ImmersiveCardProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="w-full h-full relative"
+              className="w-full max-w-4xl mx-auto my-auto h-[80vh] md:h-[60vh] flex items-center justify-center relative"
             >
               <img
                 src={item.imageUrl}
