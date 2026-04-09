@@ -17,12 +17,12 @@ export function GesturalOverlay({ tableNumber, currentIndex, totalItems }: Gestu
     }
     const timer = setTimeout(() => {
       if (currentIndex === 0) setShowHint(true);
-    }, 5000);
+    }, 4000);
     return () => clearTimeout(timer);
   }, [currentIndex, hasInteracted]);
   useEffect(() => {
     const dismiss = () => setHasInteracted(true);
-    window.addEventListener('touchstart', dismiss);
+    window.addEventListener('touchstart', dismiss, { passive: true });
     window.addEventListener('mousedown', dismiss);
     return () => {
       window.removeEventListener('touchstart', dismiss);
@@ -30,29 +30,35 @@ export function GesturalOverlay({ tableNumber, currentIndex, totalItems }: Gestu
     };
   }, []);
   return (
-    <div className="absolute inset-0 z-30 pointer-events-none flex flex-col justify-between p-6 sm:p-10 max-w-7xl mx-auto w-full left-1/2 -translate-x-1/2">
+    <div className="absolute inset-0 z-30 pointer-events-none flex flex-col justify-between p-6 sm:p-10 pt-12 sm:pt-16 max-w-7xl mx-auto w-full left-1/2 -translate-x-1/2">
+      {/* Top Branding Bar */}
       <motion.div
-        initial={{ y: -50, opacity: 0 }}
+        initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="flex justify-between items-start pointer-events-auto"
       >
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-white rounded-3xl flex items-center justify-center text-black font-black text-3xl shadow-[0_10px_40px_rgba(255,255,255,0.15)]">
+          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-black font-black text-2xl shadow-2xl">
             B
           </div>
-          <div>
-            <p className="font-black text-[10px] uppercase tracking-[0.3em] text-orange-500">BiteSight</p>
-            <p className="font-black text-xl text-white tracking-tight">{tableNumber}</p>
+          <div className="flex flex-col">
+            <p className="font-black text-[9px] uppercase tracking-[0.4em] text-orange-500 leading-none mb-1">BiteSight</p>
+            <p className="font-black text-lg text-white tracking-tight leading-none">{tableNumber}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <ThemeToggle className="h-14 w-14 rounded-full bg-black/40 backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 shadow-xl" />
+          <ThemeToggle className="h-12 w-12 rounded-full bg-black/40 backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 shadow-xl" />
         </div>
       </motion.div>
+      {/* Navigation Indicators */}
       <div className="flex-1 flex items-center justify-between px-2">
         <div className="w-12 flex justify-start">
           {currentIndex > 0 && (
-            <motion.div animate={{ opacity: [0.1, 0.3, 0.1], x: [10, 0, 10] }} transition={{ repeat: Infinity, duration: 2 }}>
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: [0.1, 0.4, 0.1], x: [10, 0, 10] }} 
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
               <ChevronLeft className="w-10 h-10 text-white/50" />
             </motion.div>
           )}
@@ -63,28 +69,35 @@ export function GesturalOverlay({ tableNumber, currentIndex, totalItems }: Gestu
               initial={{ scale: 0.8, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.8, opacity: 0, y: 10 }}
-              className="bg-black/80 backdrop-blur-xl px-8 py-4 rounded-full border border-white/10 flex items-center gap-3 shadow-2xl"
+              className="bg-black/80 backdrop-blur-2xl px-8 py-4 rounded-full border border-white/10 flex items-center gap-3 shadow-2xl pointer-events-auto"
             >
               <Hand className="w-5 h-5 text-orange-500 animate-bounce" />
-              <span className="text-white font-black text-xs uppercase tracking-[0.2em]">Swipe to Explore</span>
+              <span className="text-white font-black text-xs uppercase tracking-[0.2em]">Swipe to Discover</span>
             </motion.div>
           )}
         </AnimatePresence>
         <div className="w-12 flex justify-end">
           {currentIndex < totalItems - 1 && (
-            <motion.div animate={{ opacity: [0.1, 0.3, 0.1], x: [-10, 0, -10] }} transition={{ repeat: Infinity, duration: 2 }}>
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: [0.1, 0.4, 0.1], x: [-10, 0, -10] }} 
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
               <ChevronRight className="w-10 h-10 text-white/50" />
             </motion.div>
           )}
         </div>
       </div>
-      <div className="flex justify-center items-end pb-4">
-        <div className="pointer-events-auto bg-black/20 backdrop-blur-sm p-3 rounded-full border border-white/5">
-           <div className="flex gap-2">
+      {/* Pagination Footer */}
+      <div className="flex justify-center items-end pb-8 sm:pb-12">
+        <div className="pointer-events-auto bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/10 shadow-xl">
+           <div className="flex gap-2.5 items-center">
              {Array.from({ length: totalItems }).map((_, i) => (
                <div
                  key={i}
-                 className={`h-1.5 rounded-full transition-all duration-500 ${i === currentIndex ? "w-8 bg-orange-600" : "w-2 bg-white/20"}`}
+                 className={`h-1.5 rounded-full transition-all duration-700 ease-in-out ${
+                   i === currentIndex ? "w-8 bg-orange-600 shadow-[0_0_10px_rgba(234,88,12,0.5)]" : "w-1.5 bg-white/20"
+                 }`}
                />
              ))}
            </div>

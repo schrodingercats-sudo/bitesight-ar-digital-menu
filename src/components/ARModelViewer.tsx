@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState, useContext } from 'react';
+import React, { useEffect, useRef, useState, useContext, memo } from 'react';
 import { SwipePanContext } from './SwipePanContext';
-import { Smartphone, RefreshCw, Box, AlertTriangle } from 'lucide-react';
+import { Smartphone, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 interface ARModelViewerProps {
   src: string;
@@ -8,7 +8,7 @@ interface ARModelViewerProps {
   poster?: string;
   className?: string;
 }
-export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProps) {
+export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, className }: ARModelViewerProps) {
   const modelRef = useRef<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -18,7 +18,7 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!customElements.get('model-viewer')) {
-      import('@google/model-viewer');
+      import('@google/model-viewer').catch(console.error);
     }
   }, []);
   useEffect(() => {
@@ -33,15 +33,24 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
         setArStatus('session-started');
       }
     };
+    const handleInteraction = () => setHasInteracted(true);
     modelViewer.addEventListener('load', handleLoad);
     modelViewer.addEventListener('error', handleError);
     modelViewer.addEventListener('ar-status', handleArStatus);
+    modelViewer.addEventListener('pointerdown', handleInteraction);
     return () => {
       modelViewer.removeEventListener('load', handleLoad);
       modelViewer.removeEventListener('error', handleError);
       modelViewer.removeEventListener('ar-status', handleArStatus);
+      modelViewer.removeEventListener('pointerdown', handleInteraction);
     };
   }, [src]);
+  // Sync camera controls separately from main render to avoid property update warnings
+  useEffect(() => {
+    if (modelRef.current) {
+      modelRef.current.cameraControls = !isPanning;
+    }
+  }, [isPanning]);
   const handleReset = () => {
     if (modelRef.current) {
       modelRef.current.cameraTarget = "auto auto auto";
@@ -59,7 +68,6 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
         reveal="auto"
         ar
         ar-modes="webxr scene-viewer quick-look"
-        camera-controls={!isPanning}
         auto-rotate
         rotation-per-second="10deg"
         interaction-prompt="none"
@@ -69,7 +77,6 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
         environment-image="neutral"
         touch-action="none"
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
-        onPointerDown={() => setHasInteracted(true)}
       >
         {arStatus !== 'failed' && (
           <button
@@ -91,7 +98,7 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
             size="icon"
             variant="outline"
             onClick={handleReset}
-            className="absolute top-6 left-6 h-12 w-12 rounded-full bg-black/40 backdrop-blur-md border-white/10 text-white hover:bg-black/60 z-20"
+            className="absolute top-6 left-6 h-12 w-12 rounded-full bg-black/40 backdrop-blur-md border-white/10 text-white hover:bg-black/60 z-20 pointer-events-auto"
           >
             <RefreshCw className="w-5 h-5" />
           </Button>
@@ -107,4 +114,4 @@ export function ARModelViewer({ src, alt, poster, className }: ARModelViewerProp
       </model-viewer>
     </div>
   );
-}
+});

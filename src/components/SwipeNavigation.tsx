@@ -9,8 +9,8 @@ interface SwipeNavigationProps {
 export function SwipeNavigation({ children, onSwipeLeft, onSwipeRight }: SwipeNavigationProps) {
   const [isPanning, setIsPanning] = useState(false);
   const handlePanEnd = useCallback((_: any, info: PanInfo) => {
-    const threshold = 50;
-    const velocityThreshold = 800;
+    const threshold = 40; // Lower threshold for better sensitivity
+    const velocityThreshold = 500; // Lower velocity threshold for flick gestures
     if (info.offset.x < -threshold || info.velocity.x < -velocityThreshold) {
       onSwipeLeft();
     } else if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
