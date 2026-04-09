@@ -9,7 +9,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       await MenuItemEntity.ensureSeed(c.env);
       const result = await MenuItemEntity.list(c.env, null, 100);
-      return ok(c, result.items);
+      return ok(c, result.items || []);
     } catch (e) {
       console.error('[API ERROR] Failed to fetch menu:', e);
       return bad(c, 'Internal Server Error fetching menu');
@@ -19,13 +19,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/orders', async (c) => {
     try {
       const payload = (await c.req.json()) as OrderRequest;
-      if (!payload.items || payload.items.length === 0) {
+      if (!payload.items || !Array.isArray(payload.items) || payload.items.length === 0) {
         return bad(c, 'Invalid order: Items required');
       }
       if (!isStr(payload.tableNumber)) {
         return bad(c, 'Invalid order: Table identifier required');
       }
-      const orderTotal = payload.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const orderTotal = payload.items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
       const newOrder: Order = {
         id: crypto.randomUUID(),
         items: payload.items,
@@ -46,7 +46,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const result = await OrderEntity.list(c.env, null, 100);
       // Sort by recency (most recent first)
-      const sortedItems = [...result.items].sort((a, b) => b.timestamp - a.timestamp);
+      const sortedItems = [...(result.items || [])].sort((a, b) => b.timestamp - a.timestamp);
       return ok(c, sortedItems);
     } catch (e) {
       console.error('[API ERROR] Failed to list orders:', e);
