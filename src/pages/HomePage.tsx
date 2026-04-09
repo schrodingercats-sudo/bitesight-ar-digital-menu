@@ -1,138 +1,143 @@
-// Home page of the app.
-// Currently a demo placeholder "please wait" screen.
-// Replace this file with your actual app UI. Do not delete it to use some other file as homepage. Simply replace the entire contents of this file.
-
-import { useEffect, useMemo, useState } from 'react'
-import { Sparkles } from 'lucide-react'
-
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { HAS_TEMPLATE_DEMO, TemplateDemo } from '@/components/TemplateDemo'
-import { Button } from '@/components/ui/button'
-import { Toaster, toast } from '@/components/ui/sonner'
-
-function formatDuration(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000))
-  const m = Math.floor(total / 60)
-  const s = total % 60
-  return `${m}:${s.toString().padStart(2, '0')}`
-}
-
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingCart, Search, Menu as MenuIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { MOCK_CATEGORIES, MOCK_MENU_ITEMS } from '@shared/mock-data';
+import type { MenuItem } from '@shared/types';
+import { MenuItemCard } from '@/components/MenuItemCard';
+import { ItemDetailsDrawer } from '@/components/ItemDetailsDrawer';
+import { CartSheet } from '@/components/CartSheet';
+import { useCartStore } from '@/store/useCartStore';
+import { cn } from '@/lib/utils';
+import { ThemeToggle } from '@/components/ThemeToggle';
 export function HomePage() {
-  const [coins, setCoins] = useState(0)
-  const [isRunning, setIsRunning] = useState(false)
-  const [startedAt, setStartedAt] = useState<number | null>(null)
-  const [elapsedMs, setElapsedMs] = useState(0)
-
-  useEffect(() => {
-    if (!isRunning || startedAt === null) return
-
-    const t = setInterval(() => {
-      setElapsedMs(Date.now() - startedAt)
-    }, 250)
-
-    return () => clearInterval(t)
-  }, [isRunning, startedAt])
-
-  const formatted = useMemo(() => formatDuration(elapsedMs), [elapsedMs])
-
-  const onPleaseWait = () => {
-    setCoins((c) => c + 1)
-
-    if (!isRunning) {
-      // Resume from the current elapsed time
-      setStartedAt(Date.now() - elapsedMs)
-      setIsRunning(true)
-      toast.success('Building your app…', {
-        description: "Hang tight — we're setting everything up.",
-      })
-      return
-    }
-
-    setIsRunning(false)
-    toast.info('Still working…', {
-      description: 'You can come back in a moment.',
-    })
-  }
-
-  const onReset = () => {
-    setCoins(0)
-    setIsRunning(false)
-    setStartedAt(null)
-    setElapsedMs(0)
-    toast('Reset complete')
-  }
-
-  const onAddCoin = () => {
-    setCoins((c) => c + 1)
-    toast('Coin added')
-  }
-
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeItem, setActiveItem] = useState<MenuItem | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const cartItems = useCartStore((s) => s.items);
+  const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const categories = ['All', ...MOCK_CATEGORIES];
+  const filteredItems = useMemo(() => {
+    return MOCK_MENU_ITEMS.filter((item) => {
+      const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [selectedCategory, searchQuery]);
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-4 overflow-hidden relative">
-      <ThemeToggle />
-      <div className="absolute inset-0 bg-gradient-rainbow opacity-10 dark:opacity-20 pointer-events-none" />
-
-      <div className="text-center space-y-8 relative z-10 animate-fade-in w-full">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-primary floating">
-            <Sparkles className="w-8 h-8 text-white rotating" />
+    <div className="min-h-screen bg-[#FAFAF9] dark:bg-[#18181B] flex flex-col">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#EA580C] flex items-center justify-center text-white font-bold">B</div>
+            <h1 className="font-display font-bold text-xl tracking-tight hidden sm:block">BiteSight</h1>
+          </div>
+          <div className="flex-1 max-w-sm mx-4 relative hidden md:block">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search dishes..." 
+              className="pl-10 h-10 rounded-full border-none bg-muted/50 focus-visible:ring-primary/20"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle className="relative top-0 right-0" />
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <MenuIcon className="w-5 h-5" />
+            </Button>
           </div>
         </div>
-
-        <div className="space-y-3">
-          <h1 className="text-5xl md:text-7xl font-display font-bold text-balance leading-tight">
-            Creating your <span className="text-gradient">app</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto text-pretty">
-            Your application would be ready soon.
-          </p>
+      </header>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+        {/* Welcome Section */}
+        <div className="mb-8 mt-2">
+          <h2 className="text-3xl font-display font-bold text-foreground">Dine in 3D</h2>
+          <p className="text-muted-foreground">Scan your table to see your food before you order.</p>
         </div>
-
-        {HAS_TEMPLATE_DEMO ? (
-          <div className="max-w-5xl mx-auto text-left">
-            <TemplateDemo />
-          </div>
-        ) : (
-          <>
-            <div className="flex justify-center gap-4">
-              <Button
-                size="lg"
-                onClick={onPleaseWait}
-                className="btn-gradient px-8 py-4 text-lg font-semibold hover:-translate-y-0.5 transition-all duration-200"
-                aria-live="polite"
+        {/* Mobile Search */}
+        <div className="md:hidden mb-6 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search favorite dishes..." 
+            className="pl-10 h-12 rounded-xl bg-white dark:bg-zinc-900 border-none shadow-sm"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        {/* Category Filter */}
+        <div className="flex overflow-x-auto pb-4 gap-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 mb-6">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={cn(
+                "px-5 py-2.5 rounded-full whitespace-nowrap text-sm font-medium transition-all",
+                selectedCategory === cat 
+                  ? "bg-[#EA580C] text-white shadow-md shadow-orange-500/20" 
+                  : "bg-white dark:bg-zinc-900 text-muted-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+        {/* Menu Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence mode="popLayout">
+            {filteredItems.map((item) => (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
               >
-                Please Wait
-              </Button>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-              <div>
-                Time elapsed:{' '}
-                <span className="font-medium tabular-nums text-foreground">{formatted}</span>
-              </div>
-              <div>
-                Coins:{' '}
-                <span className="font-medium tabular-nums text-foreground">{coins}</span>
-              </div>
-            </div>
-
-            <div className="flex justify-center gap-2">
-              <Button variant="outline" size="sm" onClick={onReset}>
-                Reset
-              </Button>
-              <Button variant="outline" size="sm" onClick={onAddCoin}>
-                Add Coin
-              </Button>
-            </div>
-          </>
+                <MenuItemCard 
+                  item={item} 
+                  onViewDetails={(item) => setActiveItem(item)} 
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+        {filteredItems.length === 0 && (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground">No dishes found matching your criteria.</p>
+          </div>
         )}
+      </main>
+      {/* Floating Cart Button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <Button
+          onClick={() => setIsCartOpen(true)}
+          className="h-16 w-16 rounded-full bg-[#EA580C] hover:bg-[#C2410C] shadow-2xl flex items-center justify-center p-0 transition-transform active:scale-90"
+        >
+          <div className="relative">
+            <ShoppingCart className="w-7 h-7 text-white" />
+            {cartItemCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-white text-[#EA580C] hover:bg-white w-6 h-6 flex items-center justify-center rounded-full p-0 border-2 border-[#EA580C] font-bold">
+                {cartItemCount}
+              </Badge>
+            )}
+          </div>
+        </Button>
       </div>
-
-      <footer className="absolute bottom-8 text-center text-muted-foreground/80">
-        <p>Powered by Cloudflare</p>
-      </footer>
-
-      <Toaster richColors closeButton />
+      {/* Global Modals */}
+      <ItemDetailsDrawer 
+        item={activeItem} 
+        isOpen={!!activeItem} 
+        onClose={() => setActiveItem(null)} 
+      />
+      <CartSheet 
+        isOpen={isCartOpen} 
+        onClose={() => setIsCartOpen(false)} 
+      />
     </div>
-  )
+  );
 }
