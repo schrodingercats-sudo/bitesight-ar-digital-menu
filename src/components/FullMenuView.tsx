@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useContext } from 'react';
+import { SwipePanContext } from './SwipePanContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Utensils } from 'lucide-react';
 import type { MenuItem } from '@shared/types';
@@ -11,6 +12,7 @@ interface FullMenuViewProps {
   onClose: () => void;
 }
 export function FullMenuView({ items, onSelectItem, onClose }: FullMenuViewProps) {
+  const { isPanning } = useContext(SwipePanContext);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const categories = useMemo(() => ['All', ...MOCK_CATEGORIES], []);
   const filteredItems = useMemo(() => {
@@ -23,7 +25,7 @@ export function FullMenuView({ items, onSelectItem, onClose }: FullMenuViewProps
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-[100] bg-zinc-950 flex flex-col overflow-hidden"
+      className={`absolute inset-0 ${isPanning ? 'z-0 opacity-0 pointer-events-none' : 'z-[100]'} bg-zinc-950 flex flex-col overflow-hidden`}
     >
       {/* Header */}
       <div className="px-6 pt-16 pb-6 border-b border-white/5 bg-zinc-950/50 backdrop-blur-xl">

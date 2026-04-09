@@ -1,13 +1,12 @@
-import React, { useState, useCallback, ReactNode } from 'react';
+import React, { useCallback, ReactNode } from 'react';
 import { motion, PanInfo } from 'framer-motion';
-import { SwipePanContext } from './SwipePanContext';
 interface SwipeNavigationProps {
   children: ReactNode;
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
+  setPanning: (panning: boolean) => void;
 }
-export function SwipeNavigation({ children, onSwipeLeft, onSwipeRight }: SwipeNavigationProps) {
-  const [isPanning, setIsPanning] = useState(false);
+export function SwipeNavigation({ children, onSwipeLeft, onSwipeRight, setPanning }: SwipeNavigationProps) {
   const handlePanEnd = useCallback((_: any, info: PanInfo) => {
     const threshold = 40; // Lower threshold for better sensitivity
     const velocityThreshold = 500; // Lower velocity threshold for flick gestures
@@ -19,16 +18,14 @@ export function SwipeNavigation({ children, onSwipeLeft, onSwipeRight }: SwipeNa
   }, [onSwipeLeft, onSwipeRight]);
   return (
     <motion.div
-      onPanStart={() => setIsPanning(true)}
+      onPanStart={() => setPanning(true)}
       onPanEnd={(e, info) => {
         handlePanEnd(e, info);
-        setIsPanning(false);
+        setPanning(false);
       }}
       className="h-full w-full touch-none select-none overflow-hidden relative"
     >
-      <SwipePanContext.Provider value={{ isPanning }}>
-        {children}
-      </SwipePanContext.Provider>
+      {children}
     </motion.div>
   );
 }

@@ -8,12 +8,14 @@ import { ImmersiveCard } from '@/components/ImmersiveCard';
 import { GesturalOverlay } from '@/components/GesturalOverlay';
 import { SwipeNavigation } from '@/components/SwipeNavigation';
 import { FullMenuView } from '@/components/FullMenuView';
+import { SwipePanContext } from '@/components/SwipePanContext';
 export function HomePage() {
   const [searchParams] = useSearchParams();
   const tableNumber = searchParams.get('table') || 'Table 01';
   const [viewMode, setViewMode] = useState<'immersive' | 'grid'>('immersive');
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isPanning, setIsPanning] = useState(false);
   const { data: menuItems = [], isLoading, isError, refetch } = useQuery<MenuItem[]>({
     queryKey: ['menu'],
     queryFn: () => api<MenuItem[]>('/api/menu'),
@@ -61,6 +63,7 @@ export function HomePage() {
       x: direction > 0 ? '100%' : '-100%',
       opacity: 0,
       scale: 0.95,
+      zIndex: 1,
     }),
     center: {
       zIndex: 1,
@@ -107,41 +110,43 @@ export function HomePage() {
   const currentItem = menuItems[activeIndex];
   return (
     <div className="h-[100dvh] w-full bg-black overflow-hidden relative touch-none">
-      <SwipeNavigation onSwipeLeft={nextItem} onSwipeRight={prevItem}>
-        <AnimatePresence initial={false} custom={direction} mode="popLayout">
-          <motion.div
-            key={activeIndex}
-            custom={direction}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 350, damping: 35 },
-              opacity: { duration: 0.3 },
-              scale: { duration: 0.4 }
-            }}
-            className="absolute inset-0 h-full w-full"
-          >
-            <ImmersiveCard item={currentItem} />
-          </motion.div>
+      <SwipePanContext.Provider value={{ isPanning }}>
+        <SwipeNavigation onSwipeLeft={nextItem} onSwipeRight={prevItem} setPanning={setIsPanning}>
+          <AnimatePresence initial={false} custom={direction} mode="popLayout">
+            <motion.div
+              key={activeIndex}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 350, damping: 35 },
+                opacity: { duration: 0.3 },
+                scale: { duration: 0.4 }
+              }}
+              className="absolute inset-0 h-full w-full"
+            >
+              <ImmersiveCard item={currentItem} />
+            </motion.div>
+          </AnimatePresence>
+        </SwipeNavigation>
+        <GesturalOverlay
+          tableNumber={tableNumber}
+          currentIndex={activeIndex}
+          totalItems={menuItems.length}
+          onToggleView={() => setViewMode('grid')}
+        />
+        <AnimatePresence>
+          {viewMode === 'grid' && (
+            <FullMenuView
+              items={menuItems}
+              onSelectItem={handleSelectItem}
+              onClose={() => setViewMode('immersive')}
+            />
+          )}
         </AnimatePresence>
-      </SwipeNavigation>
-      <GesturalOverlay
-        tableNumber={tableNumber}
-        currentIndex={activeIndex}
-        totalItems={menuItems.length}
-        onToggleView={() => setViewMode('grid')}
-      />
-      <AnimatePresence>
-        {viewMode === 'grid' && (
-          <FullMenuView 
-            items={menuItems}
-            onSelectItem={handleSelectItem}
-            onClose={() => setViewMode('immersive')}
-          />
-        )}
-      </AnimatePresence>
+      </SwipePanContext.Provider>
     </div>
   );
 }

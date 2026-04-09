@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { ChevronLeft, ChevronRight, Hand, Grid } from 'lucide-react';
+import { SwipePanContext } from './SwipePanContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 interface GesturalOverlayProps {
@@ -9,6 +10,7 @@ interface GesturalOverlayProps {
   onToggleView?: () => void;
 }
 export function GesturalOverlay({ tableNumber, currentIndex, totalItems, onToggleView }: GesturalOverlayProps) {
+  const { isPanning } = useContext(SwipePanContext);
   const [showHint, setShowHint] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   useEffect(() => {
@@ -31,7 +33,7 @@ export function GesturalOverlay({ tableNumber, currentIndex, totalItems, onToggl
     };
   }, []);
   return (
-    <div className="absolute inset-0 z-30 pointer-events-none flex flex-col justify-between p-6 sm:p-10 pt-12 sm:pt-16 max-w-7xl mx-auto w-full left-1/2 -translate-x-1/2">
+    <div className={`absolute inset-0 ${isPanning ? 'z-20 opacity-80' : 'z-30 opacity-100'} pointer-events-none flex flex-col justify-between p-6 sm:p-10 pt-12 sm:pt-16 max-w-7xl mx-auto w-full left-1/2 -translate-x-1/2`}>
       {/* Top Branding Bar */}
       <motion.div
         initial={{ y: -30, opacity: 0 }}
