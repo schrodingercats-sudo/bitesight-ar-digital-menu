@@ -1,5 +1,8 @@
 if (typeof window !== 'undefined') {
+  // Suppress Lit dev mode warnings before anything loads
   (window as any).litDisableDevMode = true;
+  // Attempt to disable further Lit/ModelViewer dev logging
+  (window as any).LitHtmlConfig = { ...((window as any).LitHtmlConfig || {}), devMode: false };
 }
 import '@/lib/errorReporter';
 import { enableMapSet } from "immer";
@@ -19,7 +22,7 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 600000, // 10 minutes cache for menu stability
     },
   },
 });

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Hand } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { ChevronLeft, ChevronRight, Hand, Grid } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 interface GesturalOverlayProps {
   tableNumber: string;
   currentIndex: number;
   totalItems: number;
+  onToggleView?: () => void;
 }
-export function GesturalOverlay({ tableNumber, currentIndex, totalItems }: GesturalOverlayProps) {
+export function GesturalOverlay({ tableNumber, currentIndex, totalItems, onToggleView }: GesturalOverlayProps) {
   const [showHint, setShowHint] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   useEffect(() => {
@@ -35,7 +36,7 @@ export function GesturalOverlay({ tableNumber, currentIndex, totalItems }: Gestu
       <motion.div
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex justify-between items-start pointer-events-auto"
+        className="flex justify-between items-center pointer-events-auto"
       >
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-black font-black text-2xl shadow-2xl">
@@ -46,17 +47,21 @@ export function GesturalOverlay({ tableNumber, currentIndex, totalItems }: Gestu
             <p className="font-black text-lg text-white tracking-tight leading-none">{tableNumber}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle className="h-12 w-12 rounded-full bg-black/40 backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 shadow-xl" />
-        </div>
+        <Button 
+          onClick={onToggleView}
+          className="bg-white text-black hover:bg-zinc-200 rounded-full font-black px-6 h-12 flex items-center gap-2 shadow-2xl transition-transform active:scale-95 border-none"
+        >
+          <Grid className="w-4 h-4" />
+          <span className="text-xs uppercase tracking-widest">Full Menu</span>
+        </Button>
       </motion.div>
       {/* Navigation Indicators */}
       <div className="flex-1 flex items-center justify-between px-2">
         <div className="w-12 flex justify-start">
           {currentIndex > 0 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: [0.1, 0.4, 0.1], x: [10, 0, 10] }} 
+              animate={{ opacity: [0.1, 0.4, 0.1], x: [10, 0, 10] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
               <ChevronLeft className="w-10 h-10 text-white/50" />
@@ -78,9 +83,9 @@ export function GesturalOverlay({ tableNumber, currentIndex, totalItems }: Gestu
         </AnimatePresence>
         <div className="w-12 flex justify-end">
           {currentIndex < totalItems - 1 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: [0.1, 0.4, 0.1], x: [-10, 0, -10] }} 
+              animate={{ opacity: [0.1, 0.4, 0.1], x: [-10, 0, -10] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
               <ChevronRight className="w-10 h-10 text-white/50" />
@@ -88,21 +93,8 @@ export function GesturalOverlay({ tableNumber, currentIndex, totalItems }: Gestu
           )}
         </div>
       </div>
-      {/* Pagination Footer */}
-      <div className="flex justify-center items-end pb-8 sm:pb-12">
-        <div className="pointer-events-auto bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/10 shadow-xl">
-           <div className="flex gap-2.5 items-center">
-             {Array.from({ length: totalItems }).map((_, i) => (
-               <div
-                 key={i}
-                 className={`h-1.5 rounded-full transition-all duration-700 ease-in-out ${
-                   i === currentIndex ? "w-8 bg-orange-600 shadow-[0_0_10px_rgba(234,88,12,0.5)]" : "w-1.5 bg-white/20"
-                 }`}
-               />
-             ))}
-           </div>
-        </div>
-      </div>
+      {/* Pagination dots removed as per requirement */}
+      <div className="pb-8 sm:pb-12" />
     </div>
   );
 }

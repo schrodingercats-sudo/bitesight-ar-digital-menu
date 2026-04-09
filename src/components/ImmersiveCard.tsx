@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Info, X, Sparkles, ChefHat } from 'lucide-react';
+import { X, Sparkles, ChefHat, Box } from 'lucide-react';
 import type { MenuItem } from '@shared/types';
 import { ARModelViewer } from './ARModelViewer';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ export function ImmersiveCard({ item }: ImmersiveCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   return (
     <div className="relative h-full w-full bg-black text-white overflow-hidden flex flex-col">
+      {/* Background/3D Layer */}
       <div className="absolute inset-0 z-0 flex items-center justify-center">
         <AnimatePresence mode="wait">
           {item.glbUrl ? (
@@ -21,7 +22,7 @@ export function ImmersiveCard({ item }: ImmersiveCardProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.1 }}
               transition={{ duration: 0.5 }}
-              className="w-full h-full max-h-[75dvh] flex items-center justify-center"
+              className="w-full h-full max-h-[85dvh] flex items-center justify-center pt-20"
             >
               <ARModelViewer
                 src={item.glbUrl}
@@ -38,62 +39,52 @@ export function ImmersiveCard({ item }: ImmersiveCardProps) {
               exit={{ opacity: 0 }}
               className="w-full h-full flex items-center justify-center relative"
             >
-              <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover scale-110 blur-2xl opacity-40 absolute inset-0" />
-              <img src={item.imageUrl} alt={item.name} className="max-w-[90%] max-h-[70%] object-contain relative z-10 rounded-2xl shadow-2xl" />
+              <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover scale-110 blur-3xl opacity-30 absolute inset-0" />
+              <img src={item.imageUrl} alt={item.name} className="max-w-[85%] max-h-[60%] object-contain relative z-10 rounded-2xl shadow-2xl" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-20" />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+      {/* Top Right Action - Ergonomic placement for thumbs/one-hand use */}
+      <div className="absolute top-[120px] right-6 z-20 pointer-events-auto">
+        <Button
+          onClick={() => setShowDetails(true)}
+          className="bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-full px-5 py-6 flex flex-col items-center justify-center gap-1 shadow-2xl hover:bg-white/10 active:scale-95"
+        >
+          <Sparkles className="w-4 h-4 text-orange-400" />
+          <span className="text-[10px] font-black uppercase tracking-tighter">Details</span>
+        </Button>
+      </div>
+      {/* Info/Branding Overlay */}
       <div className="absolute inset-0 z-10 flex flex-col justify-end pointer-events-none">
-        <div className="p-8 sm:p-12 pb-[120px] sm:pb-[140px] space-y-4 max-w-2xl pointer-events-auto">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }} 
-            animate={{ opacity: 1, x: 0 }}
+        <div className="p-8 sm:p-12 pb-[140px] space-y-4 max-w-2xl pointer-events-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <Badge className="bg-orange-600 text-white border-none uppercase text-[10px] tracking-widest px-3 py-1 font-black">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <Badge className="bg-orange-600 text-white border-none uppercase text-[9px] tracking-widest px-2.5 py-0.5 font-black">
                 {item.category}
               </Badge>
-              {item.glbUrl && (
-                <Badge variant="outline" className="text-white border-white/40 bg-white/5 backdrop-blur-md text-[10px] flex gap-1.5 py-1 font-black">
-                  <Sparkles className="w-3 h-3 text-orange-400" /> 3D EXPERIENCE
-                </Badge>
-              )}
             </div>
-            <h2 className="text-5xl sm:text-7xl font-display font-black tracking-tighter leading-[0.9] mb-2">{item.name}</h2>
-            <p className="text-3xl font-black text-orange-500">${item.price.toFixed(2)}</p>
+            <h2 className="text-4xl sm:text-6xl font-display font-black tracking-tighter leading-[0.9] mb-1">{item.name}</h2>
+            <p className="text-2xl font-black text-orange-500">${item.price.toFixed(2)}</p>
           </motion.div>
-          <div className="flex items-center gap-3">
-            <Button
-              size="lg"
-              className="h-14 flex-1 sm:flex-none sm:px-12 rounded-full font-black text-lg transition-all duration-300 bg-white text-black hover:bg-zinc-200 active:scale-95"
-              onClick={() => setShowDetails(true)}
-            >
-              Explore Details
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-14 w-14 rounded-full border-white/20 bg-black/40 backdrop-blur-xl text-white hover:bg-white/10"
-              onClick={() => setShowDetails(true)}
-            >
-              <Info className="w-6 h-6" />
-            </Button>
-          </div>
         </div>
       </div>
+      {/* Full Screen Details Modal */}
       <AnimatePresence>
         {showDetails && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 bg-black/90 backdrop-blur-3xl flex items-center justify-center p-8"
+            className="absolute inset-0 z-50 bg-black/95 backdrop-blur-3xl flex items-center justify-center p-8"
           >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }} 
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               className="max-w-md w-full space-y-8"
             >

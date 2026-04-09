@@ -7,9 +7,11 @@ import type { MenuItem } from '@shared/types';
 import { ImmersiveCard } from '@/components/ImmersiveCard';
 import { GesturalOverlay } from '@/components/GesturalOverlay';
 import { SwipeNavigation } from '@/components/SwipeNavigation';
+import { FullMenuView } from '@/components/FullMenuView';
 export function HomePage() {
   const [searchParams] = useSearchParams();
   const tableNumber = searchParams.get('table') || 'Table 01';
+  const [viewMode, setViewMode] = useState<'immersive' | 'grid'>('immersive');
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const { data: menuItems = [], isLoading, isError, refetch } = useQuery<MenuItem[]>({
@@ -47,6 +49,13 @@ export function HomePage() {
       setActiveIndex((prev) => prev - 1);
     }
   }, [activeIndex]);
+  const handleSelectItem = useCallback((id: string) => {
+    const index = menuItems.findIndex(item => item.id === id);
+    if (index !== -1) {
+      setActiveIndex(index);
+      setViewMode('immersive');
+    }
+  }, [menuItems]);
   const variants = {
     enter: (direction: number) => ({
       x: direction > 0 ? '100%' : '-100%',
@@ -122,7 +131,17 @@ export function HomePage() {
         tableNumber={tableNumber}
         currentIndex={activeIndex}
         totalItems={menuItems.length}
+        onToggleView={() => setViewMode('grid')}
       />
+      <AnimatePresence>
+        {viewMode === 'grid' && (
+          <FullMenuView 
+            items={menuItems}
+            onSelectItem={handleSelectItem}
+            onClose={() => setViewMode('immersive')}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

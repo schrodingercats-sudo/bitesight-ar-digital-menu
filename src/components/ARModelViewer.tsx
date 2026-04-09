@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useContext, memo } from 'react';
 import { SwipePanContext } from './SwipePanContext';
-import { Smartphone, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Box, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 interface ARModelViewerProps {
   src: string;
@@ -45,10 +45,14 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
       modelViewer.removeEventListener('pointerdown', handleInteraction);
     };
   }, [src]);
-  // Sync camera controls separately from main render to avoid property update warnings
+  // Optimized sync: only update when isPanning changes to avoid Lit update warnings
   useEffect(() => {
-    if (modelRef.current) {
-      modelRef.current.cameraControls = !isPanning;
+    const mv = modelRef.current;
+    if (mv) {
+      const targetState = !isPanning;
+      if (mv.cameraControls !== targetState) {
+        mv.cameraControls = targetState;
+      }
     }
   }, [isPanning]);
   const handleReset = () => {
@@ -81,16 +85,16 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         {arStatus !== 'failed' && (
           <button
             slot="ar-button"
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-10 border-none text-lg"
+            className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-10 border-none text-lg"
           >
-            <Smartphone className="w-6 h-6 text-orange-500" />
-            VIEW IN YOUR SPACE
+            <Box className="w-6 h-6 text-orange-500" />
+            VIEW IN 3D
           </button>
         )}
         {arStatus === 'failed' && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 z-30 animate-bounce">
-            <AlertTriangle className="w-4 h-4" />
-            AR not supported
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-500/80 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 z-30">
+            <AlertTriangle className="w-3 h-3" />
+            AR Not Available
           </div>
         )}
         {isLoaded && hasInteracted && (
@@ -104,10 +108,10 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
           </Button>
         )}
         {!isLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center z-10 bg-black">
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-transparent">
             <div className="flex flex-col items-center gap-4">
-              <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500/60">Loading Dish</p>
+              <div className="w-12 h-12 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500/60">Digital Plate</p>
             </div>
           </div>
         )}
