@@ -1,2 +1,2 @@
 import React from 'react';
-export const SwipePanContext = React.createContext<{ isPanning: boolean }>({ isPanning: false });
+export const SwipePanContext = React.createContext<{ isPanning: boolean } | null>(null);

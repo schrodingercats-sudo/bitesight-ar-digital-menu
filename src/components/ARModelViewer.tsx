@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import { SwipePanContext } from './SwipeNavigation';
+import { SwipePanContext } from './SwipePanContext';
 import { Smartphone, RefreshCw, Box, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 interface ARModelViewerProps {
