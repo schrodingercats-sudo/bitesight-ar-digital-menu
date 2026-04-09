@@ -1,21 +1,26 @@
 import React from 'react';
-import { useSwipeable } from 'react-swipeable';
+import { motion, PanInfo } from 'framer-motion';
 interface SwipeNavigationProps {
   children: React.ReactNode;
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
 }
 export function SwipeNavigation({ children, onSwipeLeft, onSwipeRight }: SwipeNavigationProps) {
-  const handlers = useSwipeable({
-    onSwipedLeft: () => onSwipeLeft(),
-    onSwipedRight: () => onSwipeRight(),
-    preventScrollOnSwipe: true,
-    trackMouse: true,
-    delta: 50,
-  });
+  const handlePanEnd = (_: any, info: PanInfo) => {
+    const threshold = 50;
+    const velocityThreshold = 500;
+    if (info.offset.x < -threshold || info.velocity.x < -velocityThreshold) {
+      onSwipeLeft();
+    } else if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
+      onSwipeRight();
+    }
+  };
   return (
-    <div {...handlers} className="h-full w-full touch-none select-none">
+    <motion.div
+      onPanEnd={handlePanEnd}
+      className="h-full w-full touch-none select-none overflow-hidden relative"
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }

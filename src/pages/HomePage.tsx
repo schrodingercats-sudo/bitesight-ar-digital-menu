@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -20,6 +20,7 @@ export function HomePage() {
   const { data: menuItems = [], isLoading, isError } = useQuery<MenuItem[]>({
     queryKey: ['menu'],
     queryFn: () => api<MenuItem[]>('/api/menu'),
+    staleTime: 600000,
   });
   const nextItem = useCallback(() => {
     if (activeIndex < menuItems.length - 1) {
@@ -35,32 +36,40 @@ export function HomePage() {
   }, [activeIndex]);
   const variants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
-      opacity: 0
+      x: direction > 0 ? '100%' : '-100%',
+      opacity: 0,
+      scale: 0.9,
     }),
     center: {
       zIndex: 1,
       x: 0,
-      opacity: 1
+      opacity: 1,
+      scale: 1,
     },
     exit: (direction: number) => ({
       zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
-      opacity: 0
+      x: direction < 0 ? '100%' : '-100%',
+      opacity: 0,
+      scale: 0.9,
     })
   };
   if (isLoading) {
     return (
-      <div className="h-[100dvh] flex items-center justify-center bg-background">
-        <Loader2 className="w-10 h-10 animate-spin text-orange-500" />
+      <div className="h-[100dvh] flex items-center justify-center bg-black">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+        >
+          <Loader2 className="w-10 h-10 text-orange-500" />
+        </motion.div>
       </div>
     );
   }
   if (isError || menuItems.length === 0) {
     return (
-      <div className="h-[100dvh] flex flex-col items-center justify-center bg-background p-6 text-center">
-        <h2 className="text-2xl font-bold mb-2">Menu Unavailable</h2>
-        <p className="text-muted-foreground">Please check your connection or scan the QR code again.</p>
+      <div className="h-[100dvh] flex flex-col items-center justify-center bg-zinc-950 p-6 text-center">
+        <h2 className="text-2xl font-black text-white mb-2">Menu Unavailable</h2>
+        <p className="text-zinc-400 max-w-xs">The kitchen might be closed or the signal is weak. Try refreshing.</p>
       </div>
     );
   }
@@ -68,7 +77,7 @@ export function HomePage() {
   return (
     <div className="h-[100dvh] w-full bg-black overflow-hidden relative touch-none">
       <SwipeNavigation onSwipeLeft={nextItem} onSwipeRight={prevItem}>
-        <AnimatePresence initial={false} custom={direction}>
+        <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
             key={activeIndex}
             custom={direction}
@@ -78,9 +87,10 @@ export function HomePage() {
             exit="exit"
             transition={{
               x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 }
+              opacity: { duration: 0.3 },
+              scale: { duration: 0.4 }
             }}
-            className="absolute inset-0"
+            className="absolute inset-0 h-full w-full"
           >
             <ImmersiveCard item={currentItem} />
           </motion.div>
