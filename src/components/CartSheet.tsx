@@ -12,13 +12,15 @@ import type { OrderRequest, Order } from '@shared/types';
 interface CartSheetProps {
   isOpen: boolean;
   onClose: () => void;
+  tableNumber: string;
 }
-export function CartSheet({ isOpen, onClose }: CartSheetProps) {
+export function CartSheet({ isOpen, onClose, tableNumber }: CartSheetProps) {
   const items = useCartStore((s) => s.items);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const getTotal = useCartStore((s) => s.getTotal);
   const clearCart = useCartStore((s) => s.clearCart);
+  const addPlacedOrder = useCartStore((s) => s.addPlacedOrder);
   const subtotal = getTotal();
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
@@ -27,10 +29,11 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
       method: 'POST',
       body: JSON.stringify(order),
     }),
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success('Order placed successfully!', {
-        description: 'The kitchen has received your order.',
+        description: `Table ${tableNumber} - The kitchen is preparing your food.`,
       });
+      if (data?.id) addPlacedOrder(data.id);
       clearCart();
       onClose();
     },
@@ -43,7 +46,7 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
   const handleCheckout = () => {
     checkoutMutation.mutate({
       items,
-      tableNumber: "Table 12", // In real app, this would come from URL or scan
+      tableNumber,
     });
   };
   return (
@@ -52,7 +55,7 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
         <SheetHeader className="p-6 border-b">
           <SheetTitle className="flex items-center gap-2">
             <ShoppingBasket className="w-5 h-5 text-[#EA580C]" />
-            Your Order
+            Your Order — {tableNumber}
           </SheetTitle>
         </SheetHeader>
         {items.length === 0 ? (
@@ -79,7 +82,7 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
                         <h4 className="font-semibold text-sm truncate pr-2">{item.name}</h4>
                         <button
                           onClick={() => removeItem(item.id)}
-                          className="text-muted-foreground hover:text-destructive"
+                          className="text-muted-foreground hover:text-destructive transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -109,7 +112,7 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
                 ))}
               </div>
             </ScrollArea>
-            <div className="p-6 bg-muted/50 space-y-4 border-t">
+            <div className="p-6 bg-muted/50 space-y-4 border-t mt-auto">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
@@ -125,7 +128,7 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
                   <span className="text-[#EA580C]">${total.toFixed(2)}</span>
                 </div>
               </div>
-              <Button 
+              <Button
                 className="w-full h-12 text-lg font-bold bg-[#EA580C] hover:bg-[#C2410C]"
                 disabled={checkoutMutation.isPending}
                 onClick={handleCheckout}
