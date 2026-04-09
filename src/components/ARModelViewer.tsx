@@ -12,7 +12,8 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
   const modelRef = useRef<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [arStatus, setArStatus] = useState<'not-present' | 'session-started' | 'failed' | 'idle'>('idle');
+  const [arSupported, setArSupported] = useState(false);
+  const [arStatus, setArStatus] = useState<string>('none');
   const contextValue = useContext(SwipePanContext);
   const isPanning = !!contextValue?.isPanning;
   useEffect(() => {
@@ -26,18 +27,22 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
     if (!modelViewer) return;
     const handleLoad = () => setIsLoaded(true);
     const handleError = () => console.error('Model failed to load:', src);
-    const handleArStatus = (event: any) => {
-      if (event.detail.status === 'failed') {
-        setArStatus('failed');
-      } else if (event.detail.status === 'session-started') {
-        setArStatus('session-started');
+    const checkArSupported = () => {
+      if (modelViewer.canActivateAR !== undefined) {
+        setArSupported(modelViewer.canActivateAR);
       }
+    };
+
+    const handleArStatus = (event: any) => {
+      setArStatus(event.detail.status);
+      console.log('AR status changed:', event.detail.status);
     };
     const handleInteraction = () => setHasInteracted(true);
     modelViewer.addEventListener('load', handleLoad);
     modelViewer.addEventListener('error', handleError);
     modelViewer.addEventListener('ar-status', handleArStatus);
     modelViewer.addEventListener('pointerdown', handleInteraction);
+    checkArSupported();
     return () => {
       modelViewer.removeEventListener('load', handleLoad);
       modelViewer.removeEventListener('error', handleError);
@@ -73,7 +78,7 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         touch-action="none"
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' } as React.CSSProperties}
       >
-        {arStatus !== 'failed' && (
+        {arSupported && isLoaded && !arStatus?.includes('error') && arStatus !== 'session-started' && (
           <button
             slot="ar-button"
             className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-10 border-none text-lg"
@@ -82,7 +87,7 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
             VIEW IN 3D
           </button>
         )}
-        {arStatus === 'failed' && (
+        {isLoaded && (!arSupported || arStatus?.includes('error')) && (
           <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-500/80 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 z-30">
             <AlertTriangle className="w-3 h-3" />
             AR Not Available
