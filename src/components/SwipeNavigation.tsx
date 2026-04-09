@@ -1,31 +1,21 @@
-import React, { useCallback, ReactNode } from 'react';
-import { motion, PanInfo } from 'framer-motion';
+import React from 'react';
+import { useSwipeable } from 'react-swipeable';
 interface SwipeNavigationProps {
-  children: ReactNode;
+  children: React.ReactNode;
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
-  setPanning: (panning: boolean) => void;
 }
-export function SwipeNavigation({ children, onSwipeLeft, onSwipeRight, setPanning }: SwipeNavigationProps) {
-  const handlePanEnd = useCallback((_: any, info: PanInfo) => {
-    const threshold = 40; // Lower threshold for better sensitivity
-    const velocityThreshold = 500; // Lower velocity threshold for flick gestures
-    if (info.offset.x < -threshold || info.velocity.x < -velocityThreshold) {
-      onSwipeLeft();
-    } else if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
-      onSwipeRight();
-    }
-  }, [onSwipeLeft, onSwipeRight]);
+export function SwipeNavigation({ children, onSwipeLeft, onSwipeRight }: SwipeNavigationProps) {
+  const handlers = useSwipeable({
+    onSwipedLeft: () => onSwipeLeft(),
+    onSwipedRight: () => onSwipeRight(),
+    preventScrollOnSwipe: true,
+    trackMouse: true,
+    delta: 50,
+  });
   return (
-    <motion.div
-      onPanStart={() => setPanning(true)}
-      onPanEnd={(e, info) => {
-        handlePanEnd(e, info);
-        setPanning(false);
-      }}
-      className="h-full w-full touch-none select-none overflow-hidden relative"
-    >
+    <div {...handlers} className="h-full w-full touch-none select-none">
       {children}
-    </motion.div>
+    </div>
   );
 }
