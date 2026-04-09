@@ -79,7 +79,8 @@ function updateWranglerJsonc() {
 function runSetupCommands() {
     const commands = [
     "bun add @google/model-viewer@^3.5.0",
-    "bun add @google/model-viewer"
+    "bun add @google/model-viewer",
+    "bun add embla-carousel-react"
 ];
     
     if (commands.length === 0) {
