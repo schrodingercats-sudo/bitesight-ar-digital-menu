@@ -13,21 +13,19 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
   const modelRef = useRef<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [arSupported, setArSupported] = useState(false);
   const [arStatus, setArStatus] = useState<string>('none');
   const contextValue = useContext(SwipePanContext);
-  const isPanning = !!contextValue?.isPanning;
+  const isPanning = !!(contextValue && contextValue.isPanning);
   useEffect(() => {
     const modelViewer = modelRef.current;
     if (!modelViewer) return;
     const handleLoad = () => {
       setIsLoaded(true);
-      if (modelViewer.canActivateAR !== undefined) {
-        setArSupported(modelViewer.canActivateAR);
-      }
+      console.log('Model loaded, AR modes:', modelViewer.arModes);
     };
     const handleError = () => console.error('Model failed to load:', src);
     const handleArStatus = (event: any) => {
+      console.log('AR status:', event.detail.status);
       setArStatus(event.detail.status);
     };
     const handleInteraction = () => setHasInteracted(true);
@@ -57,7 +55,7 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         src={src}
         alt={alt}
         poster={poster}
-        ios-src={poster || ''}
+        ios-src=""
         loading="eager"
         reveal="auto"
         ar
@@ -66,7 +64,7 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         auto-rotate={!isPanning}
         camera-controls={!isPanning}
         rotation-per-second="10deg"
-        interaction-prompt="none"
+        interaction-prompt="auto"
         shadow-intensity="2"
         shadow-softness="0.8"
         exposure="1.2"
@@ -74,17 +72,20 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         touch-action="none"
         style={{ width: '100%', height: '100%', backgroundColor: 'transparent' } as React.CSSProperties}
       >
-        {arSupported && isLoaded && arStatus !== 'session-started' && (
+        {isLoaded && (arStatus === 'none' || arStatus === 'ready') && (
           <button
             slot="ar-button"
-            onClick={() => modelRef.current?.activateAR()}
+            onClick={() => {
+              console.log('User tapped AR button, calling activateAR()');
+              modelRef.current?.activateAR().then(() => console.log('AR activated')).catch(e => console.error('activateAR failed:', e));
+            }}
             className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-full font-black shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 z-[100] border-none text-lg pointer-events-auto"
           >
             <Box className="w-6 h-6 text-orange-500" />
             VIEW IN YOUR SPACE
           </button>
         )}
-        {isLoaded && !arSupported && (
+        {isLoaded && arStatus === 'unsupported' && (
           <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 z-30">
             <AlertTriangle className="w-3 h-3 text-orange-500" />
             3D Preview Only
