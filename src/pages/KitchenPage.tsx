@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 export function KitchenPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -30,7 +31,7 @@ export function KitchenPage() {
       setLastUpdated(new Date());
       return data;
     },
-    refetchInterval: 10000, 
+    refetchInterval: 10000,
   });
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'completed' | 'cancelled' | 'pending' }) =>
@@ -108,12 +109,12 @@ export function KitchenPage() {
                           <CardTitle className="text-2xl font-black tracking-tight">{order.tableNumber}</CardTitle>
                           <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest opacity-60">ID: {order.id.slice(0, 8)}</p>
                         </div>
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={cn(
                             "rounded-md border-2 font-bold px-2 py-0.5",
-                            order.status === 'pending' 
-                              ? "bg-orange-50 text-orange-700 border-orange-200" 
+                            order.status === 'pending'
+                              ? "bg-orange-50 text-orange-700 border-orange-200"
                               : "bg-green-50 text-green-700 border-green-200"
                           )}
                         >

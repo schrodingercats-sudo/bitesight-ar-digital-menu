@@ -10,8 +10,15 @@ declare global {
         'camera-controls'?: boolean;
         'auto-rotate'?: boolean;
         'shadow-intensity'?: string;
+        'shadow-softness'?: string;
         'ios-src'?: string;
-        'poster'?: string;
+        poster?: string;
+        exposure?: string;
+        'interaction-prompt'?: string;
+        'environment-image'?: string;
+        'loading'?: string;
+        'reveal'?: string;
+        'touch-action'?: string;
       }, HTMLElement>;
     }
   }
