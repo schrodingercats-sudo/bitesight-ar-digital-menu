@@ -3,6 +3,26 @@ if (typeof window !== 'undefined') {
   (window as any).litDisableDevMode = true;
   // Attempt to disable further Lit/ModelViewer dev logging
   (window as any).LitHtmlConfig = { ...((window as any).LitHtmlConfig || {}), devMode: false };
+  // Advanced Warning Suppressor to clear non-actionable AR and Lit messages from logs
+  const originalWarn = console.warn;
+  console.warn = (...args: any[]) => {
+    const msg = args[0];
+    if (typeof msg === 'string') {
+      const isSuppressed = [
+        'Lit is in dev mode',
+        'Falling back to next ar-mode',
+        'WebXR denied',
+        'scheduled an update',
+        'supportsPresentation'
+      ].some(text => msg.includes(text));
+      if (isSuppressed) return;
+    }
+    // Handle the case where the first argument is an empty object or has specific patterns
+    if (msg && typeof msg === 'object' && Object.keys(msg).length === 0) {
+      return;
+    }
+    originalWarn(...args);
+  };
 }
 import '@/lib/errorReporter';
 import { enableMapSet } from "immer";

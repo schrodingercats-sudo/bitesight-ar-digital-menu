@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, ChefHat, Box } from 'lucide-react';
+import { X, ChefHat, Box } from 'lucide-react';
 import type { MenuItem } from '@shared/types';
 import { ARModelViewer } from './ARModelViewer';
 import { Button } from '@/components/ui/button';
@@ -46,14 +46,14 @@ export function ImmersiveCard({ item }: ImmersiveCardProps) {
           )}
         </AnimatePresence>
       </div>
-      {/* Top Right Action - Ergonomic placement for thumbs/one-hand use */}
+      {/* Ergonomic Action Button - High visibility circular 3D trigger */}
       <div className="absolute top-[120px] right-6 z-20 pointer-events-auto">
         <Button
           onClick={() => setShowDetails(true)}
-          className="bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-full px-5 py-6 flex flex-col items-center justify-center gap-1 shadow-2xl hover:bg-white/10 active:scale-95"
+          className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-2xl border border-white/20 text-white flex flex-col items-center justify-center gap-1 shadow-[0_0_30px_rgba(255,165,0,0.2)] hover:bg-white/20 active:scale-90 transition-all"
         >
-          <Sparkles className="w-4 h-4 text-orange-400" />
-          <span className="text-[10px] font-black uppercase tracking-tighter">Details</span>
+          <Box className="w-6 h-6 text-orange-500" />
+          <span className="text-[9px] font-black uppercase tracking-tighter">Info</span>
         </Button>
       </div>
       {/* Info/Branding Overlay */}

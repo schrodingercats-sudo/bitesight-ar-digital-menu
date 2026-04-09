@@ -13,8 +13,8 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [arStatus, setArStatus] = useState<'not-present' | 'session-started' | 'failed' | 'idle'>('idle');
-  const ctx = useContext(SwipePanContext);
-  const isPanning = !!ctx?.isPanning;
+  const contextValue = useContext(SwipePanContext);
+  const isPanning = !!contextValue?.isPanning;
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!customElements.get('model-viewer')) {
@@ -45,16 +45,6 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
       modelViewer.removeEventListener('pointerdown', handleInteraction);
     };
   }, [src]);
-  // Optimized sync: only update when isPanning changes to avoid Lit update warnings
-  useEffect(() => {
-    const mv = modelRef.current;
-    if (mv) {
-      const targetState = !isPanning;
-      if (mv.cameraControls !== targetState) {
-        mv.cameraControls = targetState;
-      }
-    }
-  }, [isPanning]);
   const handleReset = () => {
     if (modelRef.current) {
       modelRef.current.cameraTarget = "auto auto auto";
@@ -72,7 +62,8 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         reveal="auto"
         ar
         ar-modes="webxr scene-viewer quick-look"
-        auto-rotate
+        auto-rotate={!isPanning}
+        camera-controls={!isPanning}
         rotation-per-second="10deg"
         interaction-prompt="none"
         shadow-intensity="2"
@@ -80,7 +71,7 @@ export const ARModelViewer = memo(function ARModelViewer({ src, alt, poster, cla
         exposure="1.2"
         environment-image="neutral"
         touch-action="none"
-        style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
+        style={{ width: '100%', height: '100%', backgroundColor: 'transparent' } as React.CSSProperties}
       >
         {arStatus !== 'failed' && (
           <button

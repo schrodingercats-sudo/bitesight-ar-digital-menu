@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Utensils } from 'lucide-react';
+import { X, Utensils } from 'lucide-react';
 import type { MenuItem } from '@shared/types';
 import { MenuItemCard } from './MenuItemCard';
 import { MOCK_CATEGORIES } from '@shared/mock-data';
@@ -30,7 +30,7 @@ export function FullMenuView({ items, onSelectItem, onClose }: FullMenuViewProps
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-4xl font-black tracking-tighter text-white">DISCOVER</h2>
-            <p className="text-zinc-500 text-xs font-black uppercase tracking-widest">Our Complete Menu</p>
+            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em]">Full Collection</p>
           </div>
           <Button
             variant="ghost"
@@ -42,15 +42,15 @@ export function FullMenuView({ items, onSelectItem, onClose }: FullMenuViewProps
           </Button>
         </div>
         {/* Categories Scroller */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide no-scrollbar -mx-2 px-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar -mx-2 px-2 scroll-smooth">
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`whitespace-nowrap px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${
+              className={`whitespace-nowrap px-8 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                 selectedCategory === cat
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-white/5 text-zinc-400 hover:bg-white/10'
+                  ? 'bg-orange-600 text-white shadow-[0_0_20px_rgba(234,88,12,0.4)]'
+                  : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
               }`}
             >
               {cat}
@@ -59,41 +59,39 @@ export function FullMenuView({ items, onSelectItem, onClose }: FullMenuViewProps
         </div>
       </div>
       {/* Grid Content */}
-      <div className="flex-1 overflow-y-auto px-6 py-8">
+      <div className="flex-1 overflow-y-auto px-6 py-8 pb-32">
         <AnimatePresence mode="popLayout">
           <motion.div
             key={selectedCategory}
-            initial={{ opacity: 0, x: 20, rotateY: 10 }}
-            animate={{ opacity: 1, x: 0, rotateY: 0 }}
-            exit={{ opacity: 0, x: -20, rotateY: -10 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {filteredItems.map((item, idx) => (
-              <div 
-                key={item.id} 
+            {filteredItems.map((item) => (
+              <div
+                key={item.id}
                 onClick={() => onSelectItem(item.id)}
                 className="cursor-pointer"
               >
-                <MenuItemCard 
-                  item={item} 
-                  onViewDetails={() => onSelectItem(item.id)} 
+                <MenuItemCard
+                  item={item}
+                  onViewDetails={() => onSelectItem(item.id)}
                 />
               </div>
             ))}
           </motion.div>
         </AnimatePresence>
         {filteredItems.length === 0 && (
-          <div className="h-64 flex flex-col items-center justify-center text-zinc-500 space-y-4">
+          <div className="h-64 flex flex-col items-center justify-center text-zinc-700 space-y-4">
             <Utensils className="w-12 h-12 opacity-20" />
-            <p className="font-black text-xs uppercase tracking-widest">No items found</p>
+            <p className="font-black text-[10px] uppercase tracking-widest">Kitchen is empty</p>
           </div>
         )}
       </div>
-      {/* Footer Decoration */}
-      <div className="p-6 bg-gradient-to-t from-black to-transparent pointer-events-none">
-        <div className="h-1 w-12 bg-zinc-800 mx-auto rounded-full mb-4" />
-      </div>
+      {/* Bottom Visual Gradient */}
+      <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
     </motion.div>
   );
 }
