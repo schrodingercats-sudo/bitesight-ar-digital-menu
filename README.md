@@ -1,6 +1,6 @@
 # Cloudflare Workers + React Fullstack Template
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/schrodingercats-sudo/bitesight-ar-digital-menu)
 
 A production-ready fullstack application template built with Cloudflare Workers, React, TypeScript, and shadcn/ui. Features Durable Objects for scalable stateful entities (e.g., Users, Chats), Hono for routing, TanStack Query for data fetching, and Tailwind CSS for styling. Perfect for real-time apps like chat systems.
 
@@ -114,7 +114,7 @@ bun run deploy
 
 Or use the dashboard:
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/schrodingercats-sudo/bitesight-ar-digital-menu)
 
 **Notes**:
 - Free tier supported.
